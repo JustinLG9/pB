@@ -36,10 +36,6 @@ export default {
     encryptObj(obj, key) {
       return CryptoJS.AES.encrypt(JSON.stringify(obj), key).toString();
     },
-    decryptObj(objJSON, key) {
-      let bytes = CryptoJS.AES.decrypt(objJSON, key);
-      return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-    },
     submitPost() {
       if (this.$refs.textEditor.content) {
         const docData = {
@@ -56,18 +52,12 @@ export default {
           .set(docData)
           .then(() => {
             console.log('Document successfully written!');
-            let enc = this.encryptObj(docData, 'penguin');
-            console.log(
-              'data: ',
-              docData,
-              'Encrypted: ',
-              enc,
-              'Decrypted: ',
-              this.decryptObj(enc, 'penguin')
-            );
             this.$refs.textEditor.content = '';
           })
-          .catch(function(error) {
+          .catch((error) => {
+            alert(
+              'Error saving entry. Please check your internet connection and try again.'
+            );
             console.error('Error adding document: ', error);
           });
       }
