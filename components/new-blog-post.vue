@@ -36,6 +36,10 @@ export default {
     encryptObj(obj, key) {
       return CryptoJS.AES.encrypt(JSON.stringify(obj), key).toString();
     },
+    decryptString(str, key) {
+      let bytes = CryptoJS.AES.decrypt(str, key);
+      return bytes.toString(CryptoJS.enc.Utf8);
+    },
     submitPost() {
       if (this.$refs.textEditor.content) {
         const docData = {
@@ -46,7 +50,12 @@ export default {
         };
 
         db.collection('users')
-          .doc(Cookies.get('access_token'))
+          .doc(
+            this.decryptString(
+              Cookies.get('access_token'),
+              this.$store.state.key
+            )
+          )
           .collection('posts')
           .doc(docData.uID)
           .set({

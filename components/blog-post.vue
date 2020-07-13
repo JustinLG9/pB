@@ -14,6 +14,7 @@
 <script>
 import firebase from 'firebase/app';
 import Cookies from 'js-cookie';
+import CryptoJS from 'crypto-js';
 
 const db = firebase.firestore();
 
@@ -50,9 +51,15 @@ export default {
 
       return hours + ':' + minutes + ' ' + meridiam;
     },
+    decryptString(str, key) {
+      let bytes = CryptoJS.AES.decrypt(str, key);
+      return bytes.toString(CryptoJS.enc.Utf8);
+    },
     deletePost() {
       db.collection('users')
-        .doc(Cookies.get('access_token'))
+        .doc(
+          this.decryptString(Cookies.get('access_token'), this.$store.state.key)
+        )
         .collection('posts')
         .doc(this.post.uID)
         .delete()

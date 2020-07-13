@@ -90,13 +90,19 @@ export default {
     setIsScrolled() {
       this.isScrolled = window.scrollY > 0;
     },
+    decryptString(str, key) {
+      let bytes = CryptoJS.AES.decrypt(str, key);
+      return bytes.toString(CryptoJS.enc.Utf8);
+    },
     decryptObj(objJSON, key) {
       let bytes = CryptoJS.AES.decrypt(objJSON, key);
       return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
     },
     fetchUserPosts() {
       db.collection('users')
-        .doc(Cookies.get('access_token'))
+        .doc(
+          this.decryptString(Cookies.get('access_token'), this.$store.state.key)
+        )
         .collection('posts')
         .onSnapshot((snapshot) => {
           snapshot.docChanges().forEach((change) => {

@@ -37,17 +37,16 @@
       <button v-else>Sign Up</button>
     </form>
     <div v-if="error" class="error">{{ error.message }}</div>
-    <div class="toggleLoginSignUp" @click="toggleLoginSignUp">
-      {{ loginSignUpMessage }}
-    </div>
+    <div class="toggleLoginSignUp" @click="toggleLoginSignUp">{{ loginSignUpMessage }}</div>
   </div>
 </template>
 
 <script>
-import firebase from 'firebase/app'
-import Cookies from 'js-cookie'
-import lockIcon from '../components/lock-icon.vue'
-import showPassword from '../components/show-password.vue'
+import firebase from 'firebase/app';
+import Cookies from 'js-cookie';
+import lockIcon from '../components/lock-icon.vue';
+import showPassword from '../components/show-password.vue';
+import CryptoJS from 'crypto-js';
 
 export default {
   components: {
@@ -62,77 +61,83 @@ export default {
       error: '',
       signingUp: false,
       loginSignUpMessage: 'New user? Sign up'
-    }
+    };
   },
   mounted() {
-    this.setupFirebase()
+    this.setupFirebase();
   },
   methods: {
+    encryptString(str, key) {
+      return CryptoJS.AES.encrypt(str, key).toString();
+    },
     setupFirebase() {
       firebase.auth().onAuthStateChanged((user) => {
         if (user) {
-          const uid = firebase.auth().currentUser.uid
-          Cookies.set('access_token', uid)
-          this.$store.commit('SET_UID', firebase.auth().currentUser.uid)
+          const uid = firebase.auth().currentUser.uid;
+          Cookies.set(
+            'access_token',
+            this.encryptString(uid, this.$store.state.key)
+          );
+          this.$store.commit('SET_UID', firebase.auth().currentUser.uid);
         } else {
-          Cookies.remove('access_token')
-          this.$store.commit('SET_UID', '')
+          Cookies.remove('access_token');
+          this.$store.commit('SET_UID', '');
         }
-      })
+      });
     },
     updateErrorMessage() {
-      const message = this.error.message
+      const message = this.error.message;
       if (message === 'The email address is badly formatted.')
-        this.error.message = 'Invalid email address'
+        this.error.message = 'Invalid email address';
       else if (
         message ===
         'There is no user record corresponding to this identifier. The user may have been deleted.'
       )
-        this.error.message = 'User does not exist'
+        this.error.message = 'User does not exist';
     },
     toggleLoginSignUp() {
-      this.signingUp = !this.signingUp
+      this.signingUp = !this.signingUp;
       if (this.signingUp)
-        this.loginSignUpMessage = 'Already have an account? Log in'
-      else this.loginSignUpMessage = 'New user? Sign up'
+        this.loginSignUpMessage = 'Already have an account? Log in';
+      else this.loginSignUpMessage = 'New user? Sign up';
     },
     submitForm() {
       if (!this.email) {
-        this.error = { message: 'Please enter an email' }
+        this.error = { message: 'Please enter an email' };
       } else if (!this.password) {
-        this.error = { message: 'Please enter a password' }
+        this.error = { message: 'Please enter a password' };
       } else if (this.signingUp && !this.passwordConfirm) {
         this.error = {
           message: 'Please enter a password confirmation'
-        }
+        };
       } else if (this.signingUp && this.password !== this.passwordConfirm) {
-        this.error = { message: 'Passwords do not match' }
+        this.error = { message: 'Passwords do not match' };
       } else if (this.signingUp) {
         firebase
           .auth()
           .createUserWithEmailAndPassword(this.email, this.password)
           .then((data) => {
-            this.$router.push('/')
+            this.$router.push('/');
           })
           .catch((error) => {
-            this.error = error
-            this.updateErrorMessage()
-          })
+            this.error = error;
+            this.updateErrorMessage();
+          });
       } else {
         firebase
           .auth()
           .signInWithEmailAndPassword(this.email, this.password)
           .then((data) => {
-            this.$router.push('/')
+            this.$router.push('/');
           })
           .catch((error) => {
-            this.error = error
-            this.updateErrorMessage()
-          })
+            this.error = error;
+            this.updateErrorMessage();
+          });
       }
     }
   }
-}
+};
 </script>
 
 <style scoped>
