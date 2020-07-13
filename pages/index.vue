@@ -24,6 +24,7 @@ import Cookies from 'js-cookie';
 import newBlogPost from '../components/new-blog-post.vue';
 import blogPost from '../components/blog-post.vue';
 import menuScreen from '../components/menu.vue';
+import CryptoJS from 'crypto-js';
 
 const db = firebase.firestore();
 
@@ -97,15 +98,36 @@ export default {
       db.collection('users')
         .doc(Cookies.get('access_token'))
         .collection('posts')
-        .orderBy('dateCreated')
         .onSnapshot((snapshot) => {
           snapshot.docChanges().forEach((change) => {
+            const decryptedData = this.decryptObj(
+              change.doc.data().encryptedData,
+              this.$store.state.key
+            );
             if (change.type === 'added') {
-              this.posts.unshift(change.doc.data());
+              // add in order of dateCreated
+              let index = 0;
+              if (this.posts.length) {
+                if (decryptedData.dateCreated > this.posts[0].dateCreated) {
+                  index = 0;
+                } else if (
+                  decryptedData.dateCreated <
+                  this.posts[this.posts.length - 1].dateCreated
+                ) {
+                  index = this.posts.length;
+                } else {
+                  index = this.posts.findIndex((post, index) => {
+                    decryptedData.dateCreated < post.dateCreated &&
+                      decryptedData.dateCreated >
+                        this.posts[index + 1].dateCreated;
+                  });
+                }
+              }
+              this.posts.splice(index, 0, decryptedData);
             }
             if (change.type === 'removed') {
               const index = this.posts.findIndex(
-                (post) => post.uID === change.doc.data().uID
+                (post) => post.uID === decryptedData.uID
               );
               this.posts.splice(index, 1);
             }

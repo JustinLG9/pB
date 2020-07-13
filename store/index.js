@@ -1,6 +1,7 @@
 export const state = () => ({
   UID: '',
-  editMode: false
+  editMode: false,
+  key: 'penguin'
 })
 
 export const actions = {}
@@ -11,5 +12,8 @@ export const mutations = {
   },
   SET_EDITMODE(state) {
     state.editMode = !state.editMode
+  },
+  SET_KEY(state, key) {
+    state.key = key
   }
 }

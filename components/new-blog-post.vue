@@ -49,7 +49,9 @@ export default {
           .doc(Cookies.get('access_token'))
           .collection('posts')
           .doc(docData.uID)
-          .set(docData)
+          .set({
+            encryptedData: this.encryptObj(docData, this.$store.state.key)
+          })
           .then(() => {
             console.log('Document successfully written!');
             this.$refs.textEditor.content = '';
