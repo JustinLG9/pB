@@ -79,6 +79,7 @@ export default {
             this.encryptString(uid, this.$store.state.key)
           );
           this.$store.commit('SET_UID', firebase.auth().currentUser.uid);
+          this.$store.commit('SET_KEY', password + email);
         } else {
           Cookies.remove('access_token');
           this.$store.commit('SET_UID', '');

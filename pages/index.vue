@@ -1,21 +1,25 @@
 <template>
-  <div class="container">
-    <i class="fas fa-bars fa-2x menuIcon" @click="toggleMenu()"></i>
-    <div v-if="showMenu" class="menu">
-      <menuScreen />
-    </div>
-    <i v-if="isScrolled" class="fas fa-arrow-up fa-2x scrollTopIcon" @click="scrollToTop()"></i>
+  <themed-container-div class="container">
+    <themed-i class="fas fa-bars fa-2x menuIcon" @click.native="toggleMenu()" />
+    <transition name="slide-fade">
+      <menuScreen v-if="showMenu" />
+    </transition>
+    <themed-i
+      v-if="isScrolled"
+      class="fas fa-arrow-up fa-2x scrollTopIcon"
+      @click.native="scrollToTop()"
+    />
     <div @click="hideMenu()">
       <br />
       <newBlogPost />
       <br />
       <blogPost v-for="post in posts" :key="post.uID" class="blogPost" :post="post" />
-      <div
+      <themed-p
         v-if="posts.length == 0"
         class="noPostsMessage"
-      >Looks like you haven't posted yet. Give it a try above!</div>
+      >Looks like you haven't posted yet. Give it a try above!</themed-p>
     </div>
-  </div>
+  </themed-container-div>
 </template>
 
 <script>
@@ -25,6 +29,9 @@ import newBlogPost from '../components/new-blog-post.vue';
 import blogPost from '../components/blog-post.vue';
 import menuScreen from '../components/menu.vue';
 import CryptoJS from 'crypto-js';
+import themedI from '../components/themed-components/themedI.vue';
+import themedContainerDiv from '../components/themed-components/themedContainerDiv.vue';
+import themedP from '../components/themed-components/themedP.vue';
 
 const db = firebase.firestore();
 
@@ -32,7 +39,10 @@ export default {
   components: {
     newBlogPost,
     blogPost,
-    menuScreen
+    menuScreen,
+    themedI,
+    themedContainerDiv,
+    themedP
   },
 
   asyncData({ req, redirect }) {
@@ -122,11 +132,14 @@ export default {
                 ) {
                   index = this.posts.length;
                 } else {
-                  index = this.posts.findIndex((post, index) => {
-                    decryptedData.dateCreated < post.dateCreated &&
-                      decryptedData.dateCreated >
-                        this.posts[index + 1].dateCreated;
-                  });
+                  index =
+                    this.posts.findIndex((post, index) => {
+                      return (
+                        decryptedData.dateCreated < post.dateCreated &&
+                        decryptedData.dateCreated >
+                          this.posts[index + 1].dateCreated
+                      );
+                    }) + 1;
                 }
               }
               this.posts.splice(index, 0, decryptedData);
@@ -153,19 +166,18 @@ export default {
   justify-content: center;
   align-items: center;
   text-align: center;
-  background-color: var(--color-1);
 }
 
 .menuIcon,
 .scrollTopIcon {
   position: fixed;
   cursor: pointer;
-  color: var(--color-2);
 }
 
 .menuIcon {
-  top: calc(8px + (50 - 8) * ((100vw - 340px) / (1600 - 340)));
-  right: calc(8px + (50 - 8) * ((100vw - 340px) / (1600 - 340)));
+  top: calc(8px + (35 - 8) * ((100vw - 340px) / (1600 - 340)));
+  right: calc(8px + (35 - 8) * ((100vw - 340px) / (1600 - 340)));
+  z-index: 9999;
 }
 
 .scrollTopIcon {
@@ -176,7 +188,6 @@ export default {
 .title {
   font-weight: 300;
   font-size: 42px;
-  color: var(--color-2);
   word-spacing: 5px;
   padding-bottom: 15px;
   display: flex;
@@ -184,7 +195,16 @@ export default {
   margin-left: 15px;
 }
 
-.noPostsMessage {
-  color: var(--color-2);
+/* menu animation */
+.slide-fade-enter-active {
+  transition: all 0.3s ease;
+}
+.slide-fade-leave-active {
+  transition: all 0.3s ease;
+}
+.slide-fade-enter,
+.slide-fade-leave-to {
+  transform: translateX(100%);
+  opacity: 0;
 }
 </style>

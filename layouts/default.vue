@@ -1,27 +1,44 @@
 <template>
   <div>
-    <img class="logo" src="../static/pBLogo.png" @click="toggleLogoMenu()" />
+    <themed-h1 class="logo" @click.native="toggleLogoMenu()">pB</themed-h1>
     <div v-show="showLogoMenu" class="logoMenu"></div>
     <nuxt @click="hideLogoMenu()" />
   </div>
 </template>
 
 <script>
+import themedH1 from '../components/themed-components/themedH1.vue';
+
 export default {
   data() {
     return {
       showLogoMenu: false
-    }
+    };
+  },
+  components: {
+    themedH1
   },
   methods: {
     toggleLogoMenu() {
-      this.showLogoMenu = !this.showLogoMenu
+      this.showLogoMenu = !this.showLogoMenu;
     },
     hideLogoMenu() {
-      this.showLogoMenu = false
+      this.showLogoMenu = false;
+    }
+  },
+  computed: {
+    palette() {
+      return {
+        '--color-1': this.$store.state.colorPalette.color1,
+        '--color-2': this.$store.state.colorPalette.color2,
+        '--color-3': this.$store.state.colorPalette.color3,
+        '--color-3-inactive': this.$store.state.colorPalette.color3Inactive,
+        '--color-4': this.$store.state.colorPalette.color4,
+        '--color-5': this.$store.state.colorPalette.color5
+      };
     }
   }
-}
+};
 </script>
 
 <style>
@@ -51,10 +68,11 @@ html {
 }
 
 .logo {
+  font-family: 'Comic Sans MS';
   position: absolute;
-  top: 20px;
-  left: 20px;
-  width: 50px;
+  top: 15px;
+  left: 25px;
+  font-size: 35px;
 }
 .logo:hover {
   cursor: pointer;

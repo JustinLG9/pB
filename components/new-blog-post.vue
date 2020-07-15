@@ -1,9 +1,9 @@
 <template>
-  <div class="blogContainer">
-    <h1 class="title">New Post</h1>
+  <themed-div class="blogContainer">
+    <themed-h1 class="title">New Post</themed-h1>
     <textEditor ref="textEditor" />
-    <button class="submitNewPost" @click="submitPost()">Submit</button>
-  </div>
+    <themed-button class="submitNewPost" @click.native="submitPost()">Submit</themed-button>
+  </themed-div>
 </template>
 
 <script>
@@ -11,12 +11,18 @@ import firebase from 'firebase/app';
 import Cookies from 'js-cookie';
 import textEditor from './quillEditor.vue';
 import CryptoJS from 'crypto-js';
+import themedDiv from '../components/themed-components/themedDiv.vue';
+import themedButton from '../components/themed-components/themedButton.vue';
+import themedH1 from '../components/themed-components/themedH1.vue';
 
 const db = firebase.firestore();
 
 export default {
   components: {
-    textEditor
+    textEditor,
+    themedDiv,
+    themedButton,
+    themedH1
   },
   data() {
     return {
@@ -80,8 +86,8 @@ export default {
 <style scoped>
 .blogContainer {
   width: calc(280px + (1000 - 280) * ((100vw - 340px) / (1600 - 340)));
-  background-color: var(--color-3);
-  border: 1px solid var(--color-4);
+  border-width: 1px;
+  border-style: solid;
   border-radius: 10px;
   padding: 25px;
   margin: 60px 40px;
@@ -91,17 +97,14 @@ export default {
 .submitNewPost {
   display: inline-block;
   border-radius: 4px;
-  border: 1px solid var(--color-1-bright);
-  color: var(--color-1-bright);
-  background-color: var(--color-3);
+  border-width: 1px;
+  border-style: solid;
   padding: 10px 30px;
   margin-top: 30px;
   outline: none;
 }
 
 .submitNewPost:hover {
-  color: var(--color-4);
-  background-color: var(--color-1-bright);
   cursor: pointer;
 }
 </style>

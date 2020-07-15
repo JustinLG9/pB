@@ -1,20 +1,24 @@
 <template>
-  <div class="blogContainer">
-    <h1
+  <themed-div class="blogContainer">
+    <themed-h1
       class="blogPostDate title"
-      @mouseenter="showTime = true"
-      @mouseleave="showTime = false"
-    >{{ utcToDate(post.dateCreated) }}</h1>
-    <h5 v-if="showTime" class="blogPostTime">{{ utcToTime(post.dateCreated) }}</h5>
-    <div class="blogPostContent" v-html="post.content"></div>
-    <i v-if="editMode" class="fas fa-times fa-2x deletePost" @click="deletePost"></i>
-  </div>
+      @mouseenter.native="showTime = true"
+      @mouseleave.native="showTime = false"
+    >{{ utcToDate(post.dateCreated) }}</themed-h1>
+    <themed-p v-if="showTime" class="blogPostTime">{{ utcToTime(post.dateCreated) }}</themed-p>
+    <themed-p class="blogPostContent" v-html="post.content" />
+    <themed-i v-if="editMode" class="fas fa-times fa-2x deletePost" @click.native="deletePost" />
+  </themed-div>
 </template>
 
 <script>
 import firebase from 'firebase/app';
 import Cookies from 'js-cookie';
 import CryptoJS from 'crypto-js';
+import themedDiv from '../components/themed-components/themedDiv.vue';
+import themedH1 from '../components/themed-components/themedH1.vue';
+import themedP from '../components/themed-components/themedP.vue';
+import themedI from '../components/themed-components/themedI.vue';
 
 const db = firebase.firestore();
 
@@ -24,6 +28,12 @@ export default {
     return {
       showTime: false
     };
+  },
+  components: {
+    themedDiv,
+    themedH1,
+    themedP,
+    themedI
   },
   computed: {
     editMode() {
@@ -86,8 +96,8 @@ export default {
 <style scoped>
 .blogContainer {
   width: calc(280px + (1000 - 280) * ((100vw - 340px) / (1600 - 340)));
-  background-color: #0e273c;
-  border: 1px solid var(--color-4);
+  border-width: 1px;
+  border-style: solid;
   border-radius: 10px;
   padding: 25px;
   margin: 40px;
@@ -95,7 +105,6 @@ export default {
   position: relative;
 }
 .blogPostContent {
-  color: var(--color-4);
   margin: 25px;
   text-align: justify;
 }
@@ -103,10 +112,8 @@ export default {
   position: absolute;
   top: 75px;
   left: 60px;
-  color: var(--color-4);
 }
 .deletePost {
-  color: var(--color-2);
   position: absolute;
   top: 15px;
   right: 15px;
