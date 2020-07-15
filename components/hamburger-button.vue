@@ -52,6 +52,8 @@ export default {
 .bar3 {
   position: absolute;
   align-self: center;
+  margin-top: auto;
+  margin-bottom: auto;
 }
 
 .bar1.active {
