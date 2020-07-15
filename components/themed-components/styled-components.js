@@ -19,7 +19,15 @@ export const ThemedContainerDiv = styled('div', containerDivProps)`
   background-color: ${props => props.backgroundColor};
 `;
 
-const themeProps = {
+const hamburgerDivProps = {
+  backgroundColor: String
+}
+
+export const ThemedHamburgerDiv = styled('div', hamburgerDivProps)`
+  background-color: ${props => props.backgroundColor};
+`;
+
+const buttonProps = {
   backgroundColor: String,
   color: String,
   borderColor: String,
@@ -27,7 +35,7 @@ const themeProps = {
   hoverColor: String
 };
 
-export const ThemedButton = styled('button', themeProps)`
+export const ThemedButton = styled('button', buttonProps)`
   background-color: ${props => props.backgroundColor};
   color: ${props => props.color};
   border-color: ${props => props.borderColor};

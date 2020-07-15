@@ -1,6 +1,6 @@
 <template>
   <themed-container-div class="container">
-    <themed-i class="fas fa-bars fa-2x menuIcon" @click.native="toggleMenu()" />
+    <hamburger-button :active="showMenu" class="menuIcon" @click.native="toggleMenu()" />
     <transition name="slide-fade">
       <menuScreen v-if="showMenu" />
     </transition>
@@ -32,6 +32,7 @@ import CryptoJS from 'crypto-js';
 import themedI from '../components/themed-components/themedI.vue';
 import themedContainerDiv from '../components/themed-components/themedContainerDiv.vue';
 import themedP from '../components/themed-components/themedP.vue';
+import hamburgerButton from '../components/hamburger-button.vue';
 
 const db = firebase.firestore();
 
@@ -42,7 +43,8 @@ export default {
     menuScreen,
     themedI,
     themedContainerDiv,
-    themedP
+    themedP,
+    hamburgerButton
   },
 
   asyncData({ req, redirect }) {
@@ -193,6 +195,10 @@ export default {
   display: flex;
   align-items: left;
   margin-left: 15px;
+}
+
+.menuShowing {
+  opacity: 0.5;
 }
 
 /* menu animation */

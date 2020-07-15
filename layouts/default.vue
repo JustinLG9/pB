@@ -1,6 +1,6 @@
 <template>
   <div>
-    <themed-h1 class="logo" @click.native="toggleLogoMenu()">pB</themed-h1>
+    <themed-h1 class="logo" @click.native="toggleLogoMenu()">pJ</themed-h1>
     <div v-show="showLogoMenu" class="logoMenu"></div>
     <nuxt @click="hideLogoMenu()" />
   </div>

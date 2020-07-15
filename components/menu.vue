@@ -60,7 +60,7 @@ export default {
           color4: 'white'
         },
         {
-          title: 'Tiger',
+          title: 'Ashes',
           color1: '#403d39',
           color1Bright: '#fffcf2',
           color2: '#ccc5b9',
@@ -87,7 +87,7 @@ export default {
           color4: '#3d405b'
         },
         {
-          title: 'Beach',
+          title: 'Cool Steel',
           color1: '#46494c',
           color1Bright: '#dcdcdd',
           color2: '#c5c3c6',
@@ -96,7 +96,7 @@ export default {
           color4: '#1985a1'
         },
         {
-          title: 'Beach',
+          title: 'Tiger',
           color1: '#d97332',
           color1Bright: '#202c39',
           color2: '#283845',

@@ -10,7 +10,7 @@
           v-model="email"
           :class="{ activeBorder: email }"
           type="email"
-          placeholder="LarryMcBerry@gmail.com"
+          placeholder="PrivateJournaling@gmail.com"
         />
       </div>
       <div class="password formField">
