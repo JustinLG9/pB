@@ -38,6 +38,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+  cursor: pointer;
 }
 
 .outerPaletteCircle {
@@ -63,10 +64,5 @@ export default {
   border-width: 3px;
   border-style: solid;
   border-color: var(--color-3);
-}
-
-.paletteCircle:hover {
-  cursor: pointer;
-  border-color: var(--color-3-inactive);
 }
 </style>
