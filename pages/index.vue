@@ -9,15 +9,32 @@
       class="fas fa-arrow-up fa-2x scrollTopIcon"
       @click.native="scrollToTop()"
     />
-    <div @click="hideMenu()">
+    <div
+      v-infinite-scroll="fetchLimitedPosts"
+      infinite-scroll-disabled="loadMoreDocs"
+      infinite-scroll-distance="10"
+      @click="hideMenu()"
+    >
       <br />
-      <newBlogPost />
+      <newBlogPost v-on:submit-post="submitPost($event)" ref="newPost" />
       <br />
-      <blogPost v-for="post in posts" :key="post.uID" class="blogPost" :post="post" />
+      <blogPost
+        :ref="post.uID"
+        v-for="post in posts"
+        :key="post.uID"
+        class="blogPost"
+        :post="post"
+        v-on:edit-post="editPost($event)"
+        v-on:delete-post="deletePost($event)"
+      />
       <themed-p
-        v-if="posts.length == 0"
-        class="noPostsMessage"
+        v-if="posts.length === 0"
+        class="footerMessage"
       >Looks like you haven't posted yet. Give it a try above!</themed-p>
+      <themed-p
+        v-if="posts.length !== 0 && allDocumentsLoaded"
+        class="footerMessage"
+      >That's all your posts!</themed-p>
     </div>
   </themed-container-div>
 </template>
@@ -35,6 +52,8 @@ import themedP from '../components/themed-components/themedP.vue';
 import hamburgerButton from '../components/hamburger-button.vue';
 
 const db = firebase.firestore();
+
+let docsLoaded = 0;
 
 export default {
   components: {
@@ -69,7 +88,10 @@ export default {
         { item: 'Logout', icon: 'fa-sign-out-alt' }
       ],
       showMenu: false,
-      isScrolled: false
+      isScrolled: false,
+      loadingDocs: false,
+      lastDateCreated: 9999999999999,
+      allDocumentsLoaded: false
     };
   },
 
@@ -80,7 +102,7 @@ export default {
 
     this.setIsScrolled();
 
-    this.fetchUserPosts();
+    // this.fetchUserPosts();
   },
 
   destroyed() {
@@ -102,13 +124,21 @@ export default {
     setIsScrolled() {
       this.isScrolled = window.scrollY > 0;
     },
+    generateUID() {
+      let s4 = () => {
+        return Math.floor((1 + Math.random()) * 0x10000)
+          .toString(16)
+          .substring(1);
+      };
+      //return id of format 'aaaaaaaa'-'aaaa'-'aaaa'-'aaaaaaaaaaaa'
+      return s4() + s4() + '-' + +s4() + '-' + s4() + '-' + s4() + s4() + s4();
+    },
+    encryptString(str, key) {
+      return CryptoJS.AES.encrypt(str, key).toString();
+    },
     decryptString(str, key) {
       let bytes = CryptoJS.AES.decrypt(str, key);
       return bytes.toString(CryptoJS.enc.Utf8);
-    },
-    decryptObj(objJSON, key) {
-      let bytes = CryptoJS.AES.decrypt(objJSON, key);
-      return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
     },
     fetchUserPosts() {
       db.collection('users')
@@ -118,10 +148,12 @@ export default {
         .collection('posts')
         .onSnapshot((snapshot) => {
           snapshot.docChanges().forEach((change) => {
-            const decryptedData = this.decryptObj(
-              change.doc.data().encryptedData,
+            let decryptedData = change.doc().data;
+            decryptedData.content = this.decryptString(
+              decryptedData.content,
               this.$store.state.key
             );
+
             if (change.type === 'added') {
               // add in order of dateCreated
               let index = 0;
@@ -160,6 +192,140 @@ export default {
             }
           });
         });
+    },
+    fetchLimitedPosts() {
+      this.loadingDocs = true;
+      db.collection('users')
+        .doc(
+          this.decryptString(Cookies.get('access_token'), this.$store.state.key)
+        )
+        .collection('posts')
+        .orderBy('dateCreated', 'desc')
+        .limit(5)
+        .startAfter(this.lastDateCreated)
+        .get()
+        .then((querySnapshot) => {
+          querySnapshot.forEach((doc) => {
+            let decryptedData = doc.data();
+            decryptedData.content = this.decryptString(
+              decryptedData.content,
+              this.$store.state.key
+            );
+            this.posts.push(decryptedData);
+            this.lastDateCreated = decryptedData.dateCreated;
+          });
+
+          if (querySnapshot.docs.length !== 5) {
+            this.allDocumentsLoaded = true;
+          }
+          this.loadingDocs = false;
+        });
+    },
+    deletePost(post) {
+      db.collection('users')
+        .doc(
+          this.decryptString(Cookies.get('access_token'), this.$store.state.key)
+        )
+        .collection('posts')
+        .doc(post.uID)
+        .delete()
+        .then(() => {
+          console.log('Document successfully deleted!');
+          const index = this.posts.findIndex(
+            (localPost) => localPost.uID === post.uID
+          );
+          this.posts.splice(index, 1);
+        })
+        .catch(function(error) {
+          alert(
+            'Error deleting post. Please check your internet connection and try again.'
+          );
+          console.error('Error removing document: ', error);
+        });
+    },
+    editPost(data) {
+      const content = data.content;
+      const post = data.post;
+      if (content) {
+        const docData = {
+          content: this.encryptString(content, this.$store.state.key),
+          dateCreated: post.dateCreated,
+          dateEdited: Date.now(),
+          uID: post.uID
+        };
+
+        db.collection('users')
+          .doc(
+            this.decryptString(
+              Cookies.get('access_token'),
+              this.$store.state.key
+            )
+          )
+          .collection('posts')
+          .doc(post.uID)
+          .set(docData)
+          .then(() => {
+            console.log('Document successfully updated!');
+            const index = this.posts.findIndex(
+              (localPost) => localPost.uID === post.uID
+            );
+            const decryptedData = {
+              content: content,
+              dateCreated: post.dateCreated,
+              dateEdited: docData.dateEdited,
+              uID: post.uID
+            };
+            this.posts.splice(index, 1, decryptedData);
+            this.$refs[post.uID][0].editPost = false;
+          })
+          .catch((error) => {
+            alert(
+              'Error updating entry. Please check your internet connection and try again.'
+            );
+            console.error('Error updating document: ', error);
+          });
+      }
+    },
+    submitPost(content) {
+      if (content) {
+        const docData = {
+          content: this.encryptString(content, this.$store.state.key),
+          dateCreated: Date.now(),
+          dateEdited: Date.now(),
+          uID: this.generateUID()
+        };
+
+        db.collection('users')
+          .doc(
+            this.decryptString(
+              Cookies.get('access_token'),
+              this.$store.state.key
+            )
+          )
+          .collection('posts')
+          .doc(docData.uID)
+          .set(docData)
+          .then(() => {
+            console.log('Document successfully written!');
+            // add new post to local posts data for rendering
+            let decryptedData = docData;
+            decryptedData.content = content;
+            this.posts.unshift(decryptedData);
+
+            this.$refs.newPost.$refs.textEditor.content = '';
+          })
+          .catch((error) => {
+            alert(
+              'Error saving entry. Please check your internet connection and try again.'
+            );
+            console.error('Error adding document: ', error);
+          });
+      }
+    }
+  },
+  computed: {
+    loadMoreDocs() {
+      return this.allDocumentsLoaded || this.loadingDocs;
     }
   }
 };
@@ -205,6 +371,10 @@ export default {
 
 .menuShowing {
   opacity: 0.5;
+}
+
+.footerMessage {
+  margin-bottom: 60px;
 }
 
 /* menu animation */

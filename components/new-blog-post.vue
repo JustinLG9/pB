@@ -2,7 +2,10 @@
   <themed-div class="blogContainer">
     <themed-h1 class="title">New Post</themed-h1>
     <text-editor ref="textEditor" />
-    <themed-button class="submitNewPost" @click.native="submitPost()">Submit</themed-button>
+    <themed-button
+      class="submitNewPost"
+      @click.native="$emit('submit-post', $refs.textEditor.content)"
+    >Submit</themed-button>
   </themed-div>
 </template>
 
@@ -28,57 +31,6 @@ export default {
     return {
       input: ''
     };
-  },
-  methods: {
-    generateUID() {
-      let s4 = () => {
-        return Math.floor((1 + Math.random()) * 0x10000)
-          .toString(16)
-          .substring(1);
-      };
-      //return id of format 'aaaaaaaa'-'aaaa'-'aaaa'-'aaaaaaaaaaaa'
-      return s4() + s4() + '-' + +s4() + '-' + s4() + '-' + s4() + s4() + s4();
-    },
-    encryptObj(obj, key) {
-      return CryptoJS.AES.encrypt(JSON.stringify(obj), key).toString();
-    },
-    decryptString(str, key) {
-      let bytes = CryptoJS.AES.decrypt(str, key);
-      return bytes.toString(CryptoJS.enc.Utf8);
-    },
-    submitPost() {
-      if (this.$refs.textEditor.content) {
-        const docData = {
-          content: this.$refs.textEditor.content,
-          dateCreated: Date.now(),
-          dateEdited: Date.now(),
-          uID: this.generateUID()
-        };
-
-        db.collection('users')
-          .doc(
-            this.decryptString(
-              Cookies.get('access_token'),
-              this.$store.state.key
-            )
-          )
-          .collection('posts')
-          .doc(docData.uID)
-          .set({
-            encryptedData: this.encryptObj(docData, this.$store.state.key)
-          })
-          .then(() => {
-            console.log('Document successfully written!');
-            this.$refs.textEditor.content = '';
-          })
-          .catch((error) => {
-            alert(
-              'Error saving entry. Please check your internet connection and try again.'
-            );
-            console.error('Error adding document: ', error);
-          });
-      }
-    }
   }
 };
 </script>

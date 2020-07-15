@@ -43,7 +43,8 @@ export default {
   plugins: [
     { src: '~plugins/quill', ssr: false },
     { src: '~/plugins/localStorage.js', ssr: false },
-    { src: '~/plugins/firebase.js' }
+    { src: '~/plugins/firebase.js' },
+    { src: '~/plugins/infiniteScroll.js', ssr: false }
   ],
   /*
    ** Nuxt.js dev-modules

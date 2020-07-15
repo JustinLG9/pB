@@ -10,12 +10,19 @@
     <themed-p v-if="!editPost" class="blogPostContent" v-html="post.content" />
     <div v-else>
       <text-editor ref="textEditor" :previousContent="post.content" />
-      <themed-button class="submitEditedPost" @click.native="submitPost()">Submit</themed-button>
+      <themed-button
+        class="submitEditedPost"
+        @click.native="$emit('edit-post',{post: post, content: $refs.textEditor.content})"
+      >Submit</themed-button>
     </div>
 
     <div class="editIcons">
       <themed-i v-if="editMode" class="fas fa-pencil-alt editPost" @click.native="toggleEditPost" />
-      <themed-i v-if="editMode" class="fas fa-times fa-2x deletePost" @click.native="deletePost" />
+      <themed-i
+        v-if="editMode"
+        class="fas fa-times fa-2x deletePost"
+        @click.native="$emit('delete-post', post)"
+      />
     </div>
   </themed-div>
 </template>
@@ -79,62 +86,11 @@ export default {
       let bytes = CryptoJS.AES.decrypt(str, key);
       return bytes.toString(CryptoJS.enc.Utf8);
     },
-    encryptObj(obj, key) {
-      return CryptoJS.AES.encrypt(JSON.stringify(obj), key).toString();
+    encryptString(str, key) {
+      return CryptoJS.AES.encrypt(str, key).toString();
     },
     toggleEditPost() {
       this.editPost = !this.editPost;
-    },
-    deletePost() {
-      db.collection('users')
-        .doc(
-          this.decryptString(Cookies.get('access_token'), this.$store.state.key)
-        )
-        .collection('posts')
-        .doc(this.post.uID)
-        .delete()
-        .then(function() {
-          console.log('Document successfully deleted!');
-        })
-        .catch(function(error) {
-          alert(
-            'Error deleting post. Please check your internet connection and try again.'
-          );
-          console.error('Error removing document: ', error);
-        });
-    },
-    submitPost() {
-      if (this.$refs.textEditor.content) {
-        const docData = {
-          content: this.$refs.textEditor.content,
-          dateCreated: this.post.dateCreated,
-          dateEdited: Date.now(),
-          uID: this.post.uID
-        };
-
-        db.collection('users')
-          .doc(
-            this.decryptString(
-              Cookies.get('access_token'),
-              this.$store.state.key
-            )
-          )
-          .collection('posts')
-          .doc(this.post.uID)
-          .set({
-            encryptedData: this.encryptObj(docData, this.$store.state.key)
-          })
-          .then(() => {
-            console.log('Document successfully uodated!');
-            this.editPost = false;
-          })
-          .catch((error) => {
-            alert(
-              'Error updating entry. Please check your internet connection and try again.'
-            );
-            console.error('Error updating document: ', error);
-          });
-      }
     }
   }
 };
