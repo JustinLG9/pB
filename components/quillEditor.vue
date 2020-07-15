@@ -6,9 +6,10 @@
 
 <script>
 export default {
+  props: ['previousContent'],
   data() {
     return {
-      content: '',
+      content: this.previousContent || '',
       editorOption: {
         theme: 'snow',
         placeholder: 'Spill that shit...',
@@ -24,9 +25,9 @@ export default {
           ]
         }
       }
-    }
+    };
   }
-}
+};
 </script>
 
 <style scoped>

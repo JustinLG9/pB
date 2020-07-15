@@ -6,8 +6,17 @@
       @mouseleave.native="showTime = false"
     >{{ utcToDate(post.dateCreated) }}</themed-h1>
     <themed-p v-if="showTime" class="blogPostTime">{{ utcToTime(post.dateCreated) }}</themed-p>
-    <themed-p class="blogPostContent" v-html="post.content" />
-    <themed-i v-if="editMode" class="fas fa-times fa-2x deletePost" @click.native="deletePost" />
+
+    <themed-p v-if="!editPost" class="blogPostContent" v-html="post.content" />
+    <div v-else>
+      <text-editor ref="textEditor" :previousContent="post.content" />
+      <themed-button class="submitEditedPost" @click.native="submitPost()">Submit</themed-button>
+    </div>
+
+    <div class="editIcons">
+      <themed-i v-if="editMode" class="fas fa-pencil-alt editPost" @click.native="toggleEditPost" />
+      <themed-i v-if="editMode" class="fas fa-times fa-2x deletePost" @click.native="deletePost" />
+    </div>
   </themed-div>
 </template>
 
@@ -19,6 +28,8 @@ import themedDiv from '../components/themed-components/themedDiv.vue';
 import themedH1 from '../components/themed-components/themedH1.vue';
 import themedP from '../components/themed-components/themedP.vue';
 import themedI from '../components/themed-components/themedI.vue';
+import themedButton from '../components/themed-components/themedButton.vue';
+import textEditor from './quillEditor.vue';
 
 const db = firebase.firestore();
 
@@ -26,14 +37,17 @@ export default {
   props: ['post'],
   data() {
     return {
-      showTime: false
+      showTime: false,
+      editPost: false
     };
   },
   components: {
     themedDiv,
     themedH1,
     themedP,
-    themedI
+    themedI,
+    themedButton,
+    textEditor
   },
   computed: {
     editMode() {
@@ -65,6 +79,12 @@ export default {
       let bytes = CryptoJS.AES.decrypt(str, key);
       return bytes.toString(CryptoJS.enc.Utf8);
     },
+    encryptObj(obj, key) {
+      return CryptoJS.AES.encrypt(JSON.stringify(obj), key).toString();
+    },
+    toggleEditPost() {
+      this.editPost = !this.editPost;
+    },
     deletePost() {
       db.collection('users')
         .doc(
@@ -77,8 +97,44 @@ export default {
           console.log('Document successfully deleted!');
         })
         .catch(function(error) {
+          alert(
+            'Error deleting post. Please check your internet connection and try again.'
+          );
           console.error('Error removing document: ', error);
         });
+    },
+    submitPost() {
+      if (this.$refs.textEditor.content) {
+        const docData = {
+          content: this.$refs.textEditor.content,
+          dateCreated: this.post.dateCreated,
+          dateEdited: Date.now(),
+          uID: this.post.uID
+        };
+
+        db.collection('users')
+          .doc(
+            this.decryptString(
+              Cookies.get('access_token'),
+              this.$store.state.key
+            )
+          )
+          .collection('posts')
+          .doc(this.post.uID)
+          .set({
+            encryptedData: this.encryptObj(docData, this.$store.state.key)
+          })
+          .then(() => {
+            console.log('Document successfully uodated!');
+            this.editPost = false;
+          })
+          .catch((error) => {
+            alert(
+              'Error updating entry. Please check your internet connection and try again.'
+            );
+            console.error('Error updating document: ', error);
+          });
+      }
     }
   }
 };
@@ -113,12 +169,35 @@ export default {
   top: 75px;
   left: 60px;
 }
-.deletePost {
+.editIcons {
   position: absolute;
   top: 15px;
   right: 15px;
+  display: flex;
+  align-items: center;
 }
-.deletePost:hover {
+.editPost {
+  margin-right: 20px;
+}
+.editPost {
+  font-size: 25px;
+}
+.deletePost:hover,
+.editPost:hover {
+  cursor: pointer;
+}
+
+.submitEditedPost {
+  display: inline-block;
+  border-radius: 4px;
+  border-width: 1px;
+  border-style: solid;
+  padding: 10px 30px;
+  margin-top: 30px;
+  outline: none;
+}
+
+.submitEditedPost:hover {
   cursor: pointer;
 }
 </style>

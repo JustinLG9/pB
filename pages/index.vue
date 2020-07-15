@@ -146,6 +146,12 @@ export default {
               }
               this.posts.splice(index, 0, decryptedData);
             }
+            if (change.type === 'modified') {
+              const index = this.posts.findIndex(
+                (post) => post.uID === decryptedData.uID
+              );
+              this.posts.splice(index, 1, decryptedData);
+            }
             if (change.type === 'removed') {
               const index = this.posts.findIndex(
                 (post) => post.uID === decryptedData.uID

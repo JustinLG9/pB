@@ -87,7 +87,7 @@ export default {
           color4: '#3d405b'
         },
         {
-          title: 'Cool Steel',
+          title: 'Blue Steel',
           color1: '#46494c',
           color1Bright: '#dcdcdd',
           color2: '#c5c3c6',

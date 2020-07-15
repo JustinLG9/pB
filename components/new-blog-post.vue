@@ -1,7 +1,7 @@
 <template>
   <themed-div class="blogContainer">
     <themed-h1 class="title">New Post</themed-h1>
-    <textEditor ref="textEditor" />
+    <text-editor ref="textEditor" />
     <themed-button class="submitNewPost" @click.native="submitPost()">Submit</themed-button>
   </themed-div>
 </template>
