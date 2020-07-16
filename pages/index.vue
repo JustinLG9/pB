@@ -31,11 +31,12 @@
         v-if="posts.length === 0"
         class="footerMessage"
       >Looks like you haven't posted yet. Give it a try above!</themed-p>
-      <themed-p
-        v-if="posts.length !== 0 && allDocumentsLoaded"
-        class="footerMessage"
-      >That's all your posts!</themed-p>
+      <themed-p v-else-if="allDocumentsLoaded" class="footerMessage">That's all your posts!</themed-p>
+      <div v-else class="footerMessage">
+        <hollow-dots-spinner :animation-duration="1000" :dot-size="15" :dots-num="3" color="white" />
+      </div>
     </div>
+
     <pop-up :showPopUp="showSecurityPopUp" @toggle-pop-up="togglePopUp">
       <themed-h1 class="popUpTitle">Security</themed-h1>
 
@@ -68,6 +69,7 @@ import themedP from '../components/themed-components/themedP.vue';
 import themedH1 from '../components/themed-components/themedH1.vue';
 import hamburgerButton from '../components/hamburger-button.vue';
 import popUp from '../components/popUp.vue';
+import { HollowDotsSpinner } from 'epic-spinners';
 
 const db = firebase.firestore();
 
@@ -81,7 +83,8 @@ export default {
     themedP,
     hamburgerButton,
     popUp,
-    themedH1
+    themedH1,
+    HollowDotsSpinner
   },
 
   asyncData({ req, redirect }) {
@@ -184,37 +187,39 @@ export default {
     },
     fetchLimitedPosts() {
       this.loadingDocs = true;
-      db.collection('users')
-        .doc(this.$store.state.UID)
-        .collection('posts')
-        .orderBy('dateCreated', 'desc')
-        .limit(5)
-        .startAfter(this.lastDateCreated)
-        .get()
-        .then((querySnapshot) => {
-          console.log(querySnapshot.docs.length, querySnapshot.empty);
-          querySnapshot.forEach((doc) => {
-            const decryptedData = doc.data();
-            decryptedData.content = this.decryptString(
-              decryptedData.content,
-              this.$store.state.key
+      setTimeout(() => {
+        db.collection('users')
+          .doc(this.$store.state.UID)
+          .collection('posts')
+          .orderBy('dateCreated', 'desc')
+          .limit(5)
+          .startAfter(this.lastDateCreated)
+          .get()
+          .then((querySnapshot) => {
+            console.log(querySnapshot.docs.length, querySnapshot.empty);
+            querySnapshot.forEach((doc) => {
+              const decryptedData = doc.data();
+              decryptedData.content = this.decryptString(
+                decryptedData.content,
+                this.$store.state.key
+              );
+
+              this.posts.push(decryptedData);
+              this.lastDateCreated = decryptedData.dateCreated;
+            });
+
+            if (querySnapshot.docs.length !== 5 || querySnapshot.empty) {
+              this.allDocumentsLoaded = true;
+            }
+            this.loadingDocs = false;
+          })
+          .catch((error) => {
+            console.error('Error getting documents: ', error);
+            alert(
+              'Error retrieving previous posts. Please check your internet connection and try again.'
             );
-
-            this.posts.push(decryptedData);
-            this.lastDateCreated = decryptedData.dateCreated;
           });
-
-          if (querySnapshot.docs.length !== 5 || querySnapshot.empty) {
-            this.allDocumentsLoaded = true;
-          }
-          this.loadingDocs = false;
-        })
-        .catch((error) => {
-          console.error('Error getting documents: ', error);
-          alert(
-            'Error retrieving previous posts. Please check your internet connection and try again.'
-          );
-        });
+      }, 1000);
     },
     deletePost(post) {
       db.collection('users')
@@ -369,6 +374,9 @@ export default {
 
 .footerMessage {
   margin-bottom: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Pop Up */
