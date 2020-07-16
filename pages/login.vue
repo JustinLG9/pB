@@ -37,9 +37,7 @@
       <button v-else>Sign Up</button>
     </form>
     <div v-if="error" class="error">{{ error.message }}</div>
-    <div class="toggleLoginSignUp" @click="toggleLoginSignUp">
-      {{ loginSignUpMessage }}
-    </div>
+    <div class="toggleLoginSignUp" @click="toggleLoginSignUp">{{ loginSignUpMessage }}</div>
   </div>
 </template>
 
@@ -76,12 +74,12 @@ export default {
       firebase.auth().onAuthStateChanged((user) => {
         if (user) {
           const uid = firebase.auth().currentUser.uid;
+          this.$store.commit('SET_UID', firebase.auth().currentUser.uid);
+          this.$store.commit('SET_KEY', this.password);
           Cookies.set(
             'access_token',
             this.encryptString(uid, this.$store.state.key)
           );
-          this.$store.commit('SET_UID', firebase.auth().currentUser.uid);
-          this.$store.commit('SET_KEY', this.password + this.email);
         } else {
           Cookies.remove('access_token');
           this.$store.commit('SET_UID', '');

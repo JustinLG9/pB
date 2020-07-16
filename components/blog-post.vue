@@ -4,36 +4,21 @@
       class="blogPostDate title"
       @mouseenter.native="showTime = true"
       @mouseleave.native="showTime = false"
-      >{{ utcToDate(post.dateCreated) }}</themed-h1
-    >
-    <themed-p v-if="showTime" class="blogPostTime">
-      {{ utcToTime(post.dateCreated) }}
-    </themed-p>
+    >{{ utcToDate(post.dateCreated) }}</themed-h1>
+    <themed-p v-if="showTime" class="blogPostTime">{{ utcToTime(post.dateCreated) }}</themed-p>
 
     <themed-p v-if="!editPost" class="blogPostContent" v-html="post.content" />
     <div v-else>
       <text-editor ref="textEditor" :previous-content="post.content" />
-      <themed-button
-        class="submitEditedPost"
-        @click.native="
-          $emit('edit-post', { post: post, content: $refs.textEditor.content })
-        "
-        >Submit</themed-button
-      >
+      <themed-button class="submitEditedPost" @click.native="submitEditedPost">Submit</themed-button>
     </div>
 
     <div class="editIcons">
-      <themed-i
-        v-if="editMode"
-        class="fas fa-pencil-alt editPost"
-        @click.native="toggleEditPost"
-      />
-      <themed-i
-        v-if="editMode"
-        class="fas fa-times fa-2x deletePost"
-        @click.native="$emit('delete-post', post)"
-      />
+      <themed-i v-if="editMode" class="fas fa-pencil-alt editPost" @click.native="toggleEditPost" />
+      <themed-i v-if="editMode" class="fas fa-times fa-2x deletePost" @click.native="deletePost" />
     </div>
+
+    <loading-shader v-if="loading" />
   </themed-div>
 </template>
 
@@ -44,6 +29,7 @@ import themedP from '../components/themed-components/themedP.vue';
 import themedI from '../components/themed-components/themedI.vue';
 import themedButton from '../components/themed-components/themedButton.vue';
 import textEditor from './quillEditor.vue';
+import loadingShader from './loadingShader.vue';
 
 export default {
   components: {
@@ -52,7 +38,8 @@ export default {
     themedP,
     themedI,
     themedButton,
-    textEditor
+    textEditor,
+    loadingShader
   },
   props: {
     post: Object
@@ -60,7 +47,8 @@ export default {
   data() {
     return {
       showTime: false,
-      editPost: false
+      editPost: false,
+      loading: false
     };
   },
   computed: {
@@ -89,6 +77,21 @@ export default {
     },
     toggleEditPost() {
       this.editPost = !this.editPost;
+    },
+    deletePost() {
+      this.loading = true;
+      setTimeout(() => {
+        this.$emit('delete-post', this.post);
+      }, 1000);
+    },
+    submitEditedPost() {
+      this.loading = true;
+      setTimeout(() => {
+        this.$emit('edit-post', {
+          post: this.post,
+          content: this.$refs.textEditor.content
+        });
+      }, 1000);
     }
   }
 };
@@ -132,8 +135,6 @@ export default {
 }
 .editPost {
   margin-right: 20px;
-}
-.editPost {
   font-size: 25px;
 }
 .deletePost:hover,

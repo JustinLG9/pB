@@ -1,12 +1,8 @@
 <template>
   <themed-container-div class="container">
-    <hamburger-button
-      :active="showMenu"
-      class="menuIcon"
-      @click.native="toggleMenu()"
-    />
+    <hamburger-button :active="showMenu" class="menuIcon" @click.native="toggleMenu()" />
     <transition name="slide-fade">
-      <menuScreen v-if="showMenu" />
+      <menuScreen v-if="showMenu" @toggle-pop-up="togglePopUp" />
     </transition>
     <themed-i
       v-if="isScrolled"
@@ -15,7 +11,7 @@
     />
     <div
       v-infinite-scroll="fetchLimitedPosts"
-      infinite-scroll-disabled="loadMoreDocs"
+      infinite-scroll-disabled="disableInfiniteScroll"
       infinite-scroll-distance="10"
       @click="hideMenu()"
     >
@@ -31,15 +27,31 @@
         @edit-post="editPost($event)"
         @delete-post="deletePost($event)"
       />
-      <themed-p v-if="posts.length === 0" class="footerMessage"
-        >Looks like you haven't posted yet. Give it a try above!</themed-p
-      >
+      <themed-p
+        v-if="posts.length === 0"
+        class="footerMessage"
+      >Looks like you haven't posted yet. Give it a try above!</themed-p>
       <themed-p
         v-if="posts.length !== 0 && allDocumentsLoaded"
         class="footerMessage"
-        >That's all your posts!</themed-p
-      >
+      >That's all your posts!</themed-p>
     </div>
+    <pop-up :showPopUp="showSecurityPopUp" @toggle-pop-up="togglePopUp">
+      <themed-h1 class="popUpTitle">Security</themed-h1>
+
+      <themed-p class="popUpParagraph">
+        Looking for confidential journaling? You've come to the right place! All your entries are encrypted before they reach our database,
+        ensuring that you and only you have access to your information.
+      </themed-p>
+      <themed-p class="popUpParagraph">
+        Not on a shared device? We generally don't keep you logged in to add an extra layer of protection but if this
+        isn't a shared computer feel free to check the box below!
+      </themed-p>
+      <div class="keepLoggedIn">
+        <themed-p>Keep Me Logged In</themed-p>
+        <input type="checkbox" v-model="keepLoggedIn" class="checkbox" @change="toggleKeepLoggedIn" />
+      </div>
+    </pop-up>
   </themed-container-div>
 </template>
 
@@ -53,7 +65,9 @@ import menuScreen from '../components/menu.vue';
 import themedI from '../components/themed-components/themedI.vue';
 import themedContainerDiv from '../components/themed-components/themedContainerDiv.vue';
 import themedP from '../components/themed-components/themedP.vue';
+import themedH1 from '../components/themed-components/themedH1.vue';
 import hamburgerButton from '../components/hamburger-button.vue';
+import popUp from '../components/popUp.vue';
 
 const db = firebase.firestore();
 
@@ -65,7 +79,9 @@ export default {
     themedI,
     themedContainerDiv,
     themedP,
-    hamburgerButton
+    hamburgerButton,
+    popUp,
+    themedH1
   },
 
   asyncData({ req, redirect }) {
@@ -93,12 +109,30 @@ export default {
       isScrolled: false,
       loadingDocs: false,
       lastDateCreated: 9999999999999,
-      allDocumentsLoaded: false
+      allDocumentsLoaded: false,
+      showSecurityPopUp: false,
+      keepLoggedIn: true,
+      stateRehydrated: false
     };
   },
   computed: {
-    loadMoreDocs() {
-      return this.allDocumentsLoaded || this.loadingDocs;
+    disableInfiniteScroll() {
+      if (this.stateRehydrated) {
+        return this.allDocumentsLoaded || this.loadingDocs;
+      } else {
+        return true;
+      }
+    },
+    isStateRehydrated() {
+      return { uid: this.$store.state.UID, key: this.$store.state.key };
+    }
+  },
+
+  watch: {
+    isStateRehydrated(newData, oldData) {
+      if (newData.uid && newData.key) {
+        this.stateRehydrated = true;
+      }
     }
   },
 
@@ -108,8 +142,6 @@ export default {
     });
 
     this.setIsScrolled();
-
-    // this.fetchUserPosts();
   },
 
   destroyed() {
@@ -127,6 +159,9 @@ export default {
     },
     hideMenu() {
       this.showMenu = false;
+    },
+    togglePopUp() {
+      this.showSecurityPopUp = !this.showSecurityPopUp;
     },
     setIsScrolled() {
       this.isScrolled = window.scrollY > 0;
@@ -147,92 +182,43 @@ export default {
       const bytes = CryptoJS.AES.decrypt(str, key);
       return bytes.toString(CryptoJS.enc.Utf8);
     },
-    fetchUserPosts() {
-      db.collection('users')
-        .doc(
-          this.decryptString(Cookies.get('access_token'), this.$store.state.key)
-        )
-        .collection('posts')
-        .onSnapshot((snapshot) => {
-          snapshot.docChanges().forEach((change) => {
-            const decryptedData = change.doc().data;
-            decryptedData.content = this.decryptString(
-              decryptedData.content,
-              this.$store.state.key
-            );
-
-            if (change.type === 'added') {
-              // add in order of dateCreated
-              let index = 0;
-              if (this.posts.length) {
-                if (decryptedData.dateCreated > this.posts[0].dateCreated) {
-                  index = 0;
-                } else if (
-                  decryptedData.dateCreated <
-                  this.posts[this.posts.length - 1].dateCreated
-                ) {
-                  index = this.posts.length;
-                } else {
-                  index =
-                    this.posts.findIndex((post, index) => {
-                      return (
-                        decryptedData.dateCreated < post.dateCreated &&
-                        decryptedData.dateCreated >
-                          this.posts[index + 1].dateCreated
-                      );
-                    }) + 1;
-                }
-              }
-              this.posts.splice(index, 0, decryptedData);
-            }
-            if (change.type === 'modified') {
-              const index = this.posts.findIndex(
-                (post) => post.uID === decryptedData.uID
-              );
-              this.posts.splice(index, 1, decryptedData);
-            }
-            if (change.type === 'removed') {
-              const index = this.posts.findIndex(
-                (post) => post.uID === decryptedData.uID
-              );
-              this.posts.splice(index, 1);
-            }
-          });
-        });
-    },
     fetchLimitedPosts() {
       this.loadingDocs = true;
       db.collection('users')
-        .doc(
-          this.decryptString(Cookies.get('access_token'), this.$store.state.key)
-        )
+        .doc(this.$store.state.UID)
         .collection('posts')
         .orderBy('dateCreated', 'desc')
         .limit(5)
         .startAfter(this.lastDateCreated)
         .get()
         .then((querySnapshot) => {
+          console.log(querySnapshot.docs.length, querySnapshot.empty);
           querySnapshot.forEach((doc) => {
             const decryptedData = doc.data();
             decryptedData.content = this.decryptString(
               decryptedData.content,
               this.$store.state.key
             );
+
             this.posts.push(decryptedData);
             this.lastDateCreated = decryptedData.dateCreated;
           });
 
-          if (querySnapshot.docs.length !== 5) {
+          if (querySnapshot.docs.length !== 5 || querySnapshot.empty) {
             this.allDocumentsLoaded = true;
           }
           this.loadingDocs = false;
+        })
+        .catch((error) => {
+          console.error('Error getting documents: ', error);
+          alert(
+            'Error retrieving previous posts. Please check your internet connection and try again.'
+          );
         });
     },
     deletePost(post) {
       db.collection('users')
-        .doc(
-          this.decryptString(Cookies.get('access_token'), this.$store.state.key)
-        )
+        .doc(this.$store.state.UID)
         .collection('posts')
         .doc(post.uID)
         .delete()
@@ -247,6 +233,7 @@ export default {
           alert(
             'Error deleting post. Please check your internet connection and try again.'
           );
+          this.$refs[post.uID][0].loading = false;
           console.error('Error removing document: ', error);
         });
     },
@@ -262,12 +249,7 @@ export default {
         };
 
         db.collection('users')
-          .doc(
-            this.decryptString(
-              Cookies.get('access_token'),
-              this.$store.state.key
-            )
-          )
+          .doc(this.$store.state.UID)
           .collection('posts')
           .doc(post.uID)
           .set(docData)
@@ -282,13 +264,16 @@ export default {
               dateEdited: docData.dateEdited,
               uID: post.uID
             };
+
             this.posts.splice(index, 1, decryptedData);
             this.$refs[post.uID][0].editPost = false;
+            this.$refs[post.uID][0].loading = false;
           })
           .catch((error) => {
             alert(
               'Error updating entry. Please check your internet connection and try again.'
             );
+            this.$refs[post.uID][0].loading = false;
             console.error('Error updating document: ', error);
           });
       }
@@ -303,12 +288,7 @@ export default {
         };
 
         db.collection('users')
-          .doc(
-            this.decryptString(
-              Cookies.get('access_token'),
-              this.$store.state.key
-            )
-          )
+          .doc(this.$store.state.UID)
           .collection('posts')
           .doc(docData.uID)
           .set(docData)
@@ -320,13 +300,26 @@ export default {
             this.posts.unshift(decryptedData);
 
             this.$refs.newPost.$refs.textEditor.content = '';
+            this.$refs.newPost.submitting = false;
           })
           .catch((error) => {
             alert(
               'Error saving entry. Please check your internet connection and try again.'
             );
+            this.$refs.newPost.submitting = false;
             console.error('Error adding document: ', error);
           });
+      }
+    },
+    toggleKeepLoggedIn() {
+      if (this.keepLoggedIn) {
+        const uid = firebase.auth().currentUser.uid;
+        Cookies.set(
+          'access_token',
+          this.encryptString(uid, this.$store.state.key)
+        );
+      } else {
+        Cookies.remove('access_token');
       }
     }
   }
@@ -335,10 +328,9 @@ export default {
 
 <style>
 .container {
-  margin: 0 auto;
   min-height: 100vh;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
@@ -377,6 +369,23 @@ export default {
 
 .footerMessage {
   margin-bottom: 60px;
+}
+
+/* Pop Up */
+.popUpParagraph {
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+.keepLoggedIn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+}
+.checkbox {
+  margin-left: 30px;
+  height: 30px;
+  width: 30px;
 }
 
 /* menu animation */
