@@ -1,23 +1,11 @@
 <template>
   <div>
-    <themed-h1 class="logo" @click.native="toggleLogoMenu()">pJ</themed-h1>
-    <div v-show="showLogoMenu" class="logoMenu"></div>
     <nuxt @click="hideLogoMenu()" />
   </div>
 </template>
 
 <script>
-import themedH1 from '../components/themed-components/themedH1.vue';
-
 export default {
-  components: {
-    themedH1
-  },
-  data() {
-    return {
-      showLogoMenu: false
-    };
-  },
   computed: {
     palette() {
       return {
@@ -28,14 +16,6 @@ export default {
         '--color-4': this.$store.state.colorPalette.color4,
         '--color-5': this.$store.state.colorPalette.color5
       };
-    }
-  },
-  methods: {
-    toggleLogoMenu() {
-      this.showLogoMenu = !this.showLogoMenu;
-    },
-    hideLogoMenu() {
-      this.showLogoMenu = false;
     }
   }
 };
@@ -65,16 +45,5 @@ html {
 *:after {
   box-sizing: border-box;
   margin: 0;
-}
-
-.logo {
-  font-family: 'Comic Sans MS';
-  position: absolute;
-  top: 15px;
-  left: 25px;
-  font-size: 35px;
-}
-.logo:hover {
-  cursor: pointer;
 }
 </style>
