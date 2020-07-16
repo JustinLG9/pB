@@ -10,21 +10,13 @@
 import themedH1 from '../components/themed-components/themedH1.vue';
 
 export default {
+  components: {
+    themedH1
+  },
   data() {
     return {
       showLogoMenu: false
     };
-  },
-  components: {
-    themedH1
-  },
-  methods: {
-    toggleLogoMenu() {
-      this.showLogoMenu = !this.showLogoMenu;
-    },
-    hideLogoMenu() {
-      this.showLogoMenu = false;
-    }
   },
   computed: {
     palette() {
@@ -36,6 +28,14 @@ export default {
         '--color-4': this.$store.state.colorPalette.color4,
         '--color-5': this.$store.state.colorPalette.color5
       };
+    }
+  },
+  methods: {
+    toggleLogoMenu() {
+      this.showLogoMenu = !this.showLogoMenu;
+    },
+    hideLogoMenu() {
+      this.showLogoMenu = false;
     }
   }
 };

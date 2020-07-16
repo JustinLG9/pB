@@ -1,6 +1,10 @@
 <template>
   <themed-container-div class="container">
-    <hamburger-button :active="showMenu" class="menuIcon" @click.native="toggleMenu()" />
+    <hamburger-button
+      :active="showMenu"
+      class="menuIcon"
+      @click.native="toggleMenu()"
+    />
     <transition name="slide-fade">
       <menuScreen v-if="showMenu" />
     </transition>
@@ -16,25 +20,25 @@
       @click="hideMenu()"
     >
       <br />
-      <newBlogPost v-on:submit-post="submitPost($event)" ref="newPost" />
+      <newBlogPost ref="newPost" @submit-post="submitPost($event)" />
       <br />
       <blogPost
-        :ref="post.uID"
         v-for="post in posts"
+        :ref="post.uID"
         :key="post.uID"
         class="blogPost"
         :post="post"
-        v-on:edit-post="editPost($event)"
-        v-on:delete-post="deletePost($event)"
+        @edit-post="editPost($event)"
+        @delete-post="deletePost($event)"
       />
-      <themed-p
-        v-if="posts.length === 0"
-        class="footerMessage"
-      >Looks like you haven't posted yet. Give it a try above!</themed-p>
+      <themed-p v-if="posts.length === 0" class="footerMessage"
+        >Looks like you haven't posted yet. Give it a try above!</themed-p
+      >
       <themed-p
         v-if="posts.length !== 0 && allDocumentsLoaded"
         class="footerMessage"
-      >That's all your posts!</themed-p>
+        >That's all your posts!</themed-p
+      >
     </div>
   </themed-container-div>
 </template>
@@ -42,18 +46,16 @@
 <script>
 import firebase from 'firebase/app';
 import Cookies from 'js-cookie';
+import CryptoJS from 'crypto-js';
 import newBlogPost from '../components/new-blog-post.vue';
 import blogPost from '../components/blog-post.vue';
 import menuScreen from '../components/menu.vue';
-import CryptoJS from 'crypto-js';
 import themedI from '../components/themed-components/themedI.vue';
 import themedContainerDiv from '../components/themed-components/themedContainerDiv.vue';
 import themedP from '../components/themed-components/themedP.vue';
 import hamburgerButton from '../components/hamburger-button.vue';
 
 const db = firebase.firestore();
-
-let docsLoaded = 0;
 
 export default {
   components: {
@@ -94,6 +96,11 @@ export default {
       allDocumentsLoaded: false
     };
   },
+  computed: {
+    loadMoreDocs() {
+      return this.allDocumentsLoaded || this.loadingDocs;
+    }
+  },
 
   mounted() {
     window.addEventListener('scroll', this.setIsScrolled, {
@@ -125,19 +132,19 @@ export default {
       this.isScrolled = window.scrollY > 0;
     },
     generateUID() {
-      let s4 = () => {
+      const s4 = () => {
         return Math.floor((1 + Math.random()) * 0x10000)
           .toString(16)
           .substring(1);
       };
-      //return id of format 'aaaaaaaa'-'aaaa'-'aaaa'-'aaaaaaaaaaaa'
+      // return id of format 'aaaaaaaa'-'aaaa'-'aaaa'-'aaaaaaaaaaaa'
       return s4() + s4() + '-' + +s4() + '-' + s4() + '-' + s4() + s4() + s4();
     },
     encryptString(str, key) {
       return CryptoJS.AES.encrypt(str, key).toString();
     },
     decryptString(str, key) {
-      let bytes = CryptoJS.AES.decrypt(str, key);
+      const bytes = CryptoJS.AES.decrypt(str, key);
       return bytes.toString(CryptoJS.enc.Utf8);
     },
     fetchUserPosts() {
@@ -148,7 +155,7 @@ export default {
         .collection('posts')
         .onSnapshot((snapshot) => {
           snapshot.docChanges().forEach((change) => {
-            let decryptedData = change.doc().data;
+            const decryptedData = change.doc().data;
             decryptedData.content = this.decryptString(
               decryptedData.content,
               this.$store.state.key
@@ -206,7 +213,7 @@ export default {
         .get()
         .then((querySnapshot) => {
           querySnapshot.forEach((doc) => {
-            let decryptedData = doc.data();
+            const decryptedData = doc.data();
             decryptedData.content = this.decryptString(
               decryptedData.content,
               this.$store.state.key
@@ -270,7 +277,7 @@ export default {
               (localPost) => localPost.uID === post.uID
             );
             const decryptedData = {
-              content: content,
+              content,
               dateCreated: post.dateCreated,
               dateEdited: docData.dateEdited,
               uID: post.uID
@@ -308,7 +315,7 @@ export default {
           .then(() => {
             console.log('Document successfully written!');
             // add new post to local posts data for rendering
-            let decryptedData = docData;
+            const decryptedData = docData;
             decryptedData.content = content;
             this.posts.unshift(decryptedData);
 
@@ -321,11 +328,6 @@ export default {
             console.error('Error adding document: ', error);
           });
       }
-    }
-  },
-  computed: {
-    loadMoreDocs() {
-      return this.allDocumentsLoaded || this.loadingDocs;
     }
   }
 };

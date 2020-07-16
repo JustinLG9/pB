@@ -1,9 +1,9 @@
 <template>
   <div class="hamburgerContainer">
-    <themed-hamburger-div :class="{active: active}" class="bar1" />
-    <themed-hamburger-div :class="{active: active}" class="bar2" />
-    <themed-hamburger-div :class="{active: active}" class="bar3" />
-    <themed-hamburger-div :class="{active: active}" class="bar4" />
+    <themed-hamburger-div :class="{ active: active }" class="bar1" />
+    <themed-hamburger-div :class="{ active: active }" class="bar2" />
+    <themed-hamburger-div :class="{ active: active }" class="bar3" />
+    <themed-hamburger-div :class="{ active: active }" class="bar4" />
   </div>
 </template>
 
@@ -11,8 +11,10 @@
 import themedHamburgerDiv from './themed-components/themedHamburgerDiv.vue';
 
 export default {
-  props: ['active'],
-  components: { themedHamburgerDiv }
+  components: { themedHamburgerDiv },
+  props: {
+    active: Boolean
+  }
 };
 </script>
 

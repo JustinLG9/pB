@@ -37,16 +37,18 @@
       <button v-else>Sign Up</button>
     </form>
     <div v-if="error" class="error">{{ error.message }}</div>
-    <div class="toggleLoginSignUp" @click="toggleLoginSignUp">{{ loginSignUpMessage }}</div>
+    <div class="toggleLoginSignUp" @click="toggleLoginSignUp">
+      {{ loginSignUpMessage }}
+    </div>
   </div>
 </template>
 
 <script>
 import firebase from 'firebase/app';
 import Cookies from 'js-cookie';
+import CryptoJS from 'crypto-js';
 import lockIcon from '../components/lock-icon.vue';
 import showPassword from '../components/show-password.vue';
-import CryptoJS from 'crypto-js';
 
 export default {
   components: {
@@ -79,7 +81,7 @@ export default {
             this.encryptString(uid, this.$store.state.key)
           );
           this.$store.commit('SET_UID', firebase.auth().currentUser.uid);
-          this.$store.commit('SET_KEY', password + email);
+          this.$store.commit('SET_KEY', this.password + this.email);
         } else {
           Cookies.remove('access_token');
           this.$store.commit('SET_UID', '');

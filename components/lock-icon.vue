@@ -13,9 +13,9 @@ export default {
   data() {
     return {
       unlocked: false
-    }
+    };
   }
-}
+};
 </script>
 
 <style scoped>

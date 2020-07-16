@@ -1,5 +1,7 @@
 <template>
-  <themed-hamburger-div :backgroundColor="$store.getters['colorPalette'].color3" />
+  <themed-hamburger-div
+    :background-color="$store.getters['colorPalette'].color3"
+  />
 </template>
 
 <script>
@@ -10,5 +12,4 @@ export default {
 };
 </script>
 
-<style>
-</style>
+<style></style>

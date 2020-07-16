@@ -1,5 +1,5 @@
 <template>
-  <ThemedContainerDiv :backgroundColor="$store.getters['colorPalette'].color1">
+  <ThemedContainerDiv :background-color="$store.getters['colorPalette'].color1">
     <slot></slot>
   </ThemedContainerDiv>
 </template>
@@ -14,5 +14,4 @@ export default {
 };
 </script>
 
-<style>
-</style>
+<style></style>

@@ -4,20 +4,30 @@
       class="blogPostDate title"
       @mouseenter.native="showTime = true"
       @mouseleave.native="showTime = false"
-    >{{ utcToDate(post.dateCreated) }}</themed-h1>
-    <themed-p v-if="showTime" class="blogPostTime">{{ utcToTime(post.dateCreated) }}</themed-p>
+      >{{ utcToDate(post.dateCreated) }}</themed-h1
+    >
+    <themed-p v-if="showTime" class="blogPostTime">
+      {{ utcToTime(post.dateCreated) }}
+    </themed-p>
 
     <themed-p v-if="!editPost" class="blogPostContent" v-html="post.content" />
     <div v-else>
-      <text-editor ref="textEditor" :previousContent="post.content" />
+      <text-editor ref="textEditor" :previous-content="post.content" />
       <themed-button
         class="submitEditedPost"
-        @click.native="$emit('edit-post',{post: post, content: $refs.textEditor.content})"
-      >Submit</themed-button>
+        @click.native="
+          $emit('edit-post', { post: post, content: $refs.textEditor.content })
+        "
+        >Submit</themed-button
+      >
     </div>
 
     <div class="editIcons">
-      <themed-i v-if="editMode" class="fas fa-pencil-alt editPost" @click.native="toggleEditPost" />
+      <themed-i
+        v-if="editMode"
+        class="fas fa-pencil-alt editPost"
+        @click.native="toggleEditPost"
+      />
       <themed-i
         v-if="editMode"
         class="fas fa-times fa-2x deletePost"
@@ -28,9 +38,6 @@
 </template>
 
 <script>
-import firebase from 'firebase/app';
-import Cookies from 'js-cookie';
-import CryptoJS from 'crypto-js';
 import themedDiv from '../components/themed-components/themedDiv.vue';
 import themedH1 from '../components/themed-components/themedH1.vue';
 import themedP from '../components/themed-components/themedP.vue';
@@ -38,16 +45,7 @@ import themedI from '../components/themed-components/themedI.vue';
 import themedButton from '../components/themed-components/themedButton.vue';
 import textEditor from './quillEditor.vue';
 
-const db = firebase.firestore();
-
 export default {
-  props: ['post'],
-  data() {
-    return {
-      showTime: false,
-      editPost: false
-    };
-  },
   components: {
     themedDiv,
     themedH1,
@@ -55,6 +53,15 @@ export default {
     themedI,
     themedButton,
     textEditor
+  },
+  props: {
+    post: Object
+  },
+  data() {
+    return {
+      showTime: false,
+      editPost: false
+    };
   },
   computed: {
     editMode() {
@@ -77,17 +84,8 @@ export default {
       hours = hours === 0 ? 1 : hours;
       let minutes = date.getMinutes();
       minutes = String(minutes).length === 1 ? '0' + minutes : minutes;
-      let seconds = date.getSeconds();
-      seconds = String(seconds).length === 1 ? '0' + seconds : seconds;
 
       return hours + ':' + minutes + ' ' + meridiam;
-    },
-    decryptString(str, key) {
-      let bytes = CryptoJS.AES.decrypt(str, key);
-      return bytes.toString(CryptoJS.enc.Utf8);
-    },
-    encryptString(str, key) {
-      return CryptoJS.AES.encrypt(str, key).toString();
     },
     toggleEditPost() {
       this.editPost = !this.editPost;

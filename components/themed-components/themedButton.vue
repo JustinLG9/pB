@@ -1,10 +1,10 @@
 <template>
   <ThemedButton
-    :backgroundColor="$store.getters['colorPalette'].color2"
+    :background-color="$store.getters['colorPalette'].color2"
     :color="$store.getters['colorPalette'].color1Bright"
-    :borderColor="$store.getters['colorPalette'].color1Bright"
-    :hoverBackgroundColor="$store.getters['colorPalette'].color1Bright"
-    :hoverColor="$store.getters['colorPalette'].color4"
+    :border-color="$store.getters['colorPalette'].color1Bright"
+    :hover-background-color="$store.getters['colorPalette'].color1Bright"
+    :hover-color="$store.getters['colorPalette'].color4"
   >
     <slot></slot>
   </ThemedButton>
@@ -18,5 +18,4 @@ export default {
 };
 </script>
 
-<style>
-</style>
+<style></style>

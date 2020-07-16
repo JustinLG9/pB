@@ -5,20 +5,16 @@
     <themed-button
       class="submitNewPost"
       @click.native="$emit('submit-post', $refs.textEditor.content)"
-    >Submit</themed-button>
+      >Submit</themed-button
+    >
   </themed-div>
 </template>
 
 <script>
-import firebase from 'firebase/app';
-import Cookies from 'js-cookie';
-import textEditor from './quillEditor.vue';
-import CryptoJS from 'crypto-js';
 import themedDiv from '../components/themed-components/themedDiv.vue';
 import themedButton from '../components/themed-components/themedButton.vue';
 import themedH1 from '../components/themed-components/themedH1.vue';
-
-const db = firebase.firestore();
+import textEditor from './quillEditor.vue';
 
 export default {
   components: {

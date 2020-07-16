@@ -1,9 +1,9 @@
 <template>
   <div class="paletteContainer" @click="setColorTheme()">
     <div class="outerPaletteCircle" :style="style">
-      <div class="paletteCircle" :style="style">{{title.slice(0,1)}}</div>
+      <div class="paletteCircle" :style="style">{{ title.slice(0, 1) }}</div>
     </div>
-    <themed-p>{{title}}</themed-p>
+    <themed-p>{{ title }}</themed-p>
   </div>
 </template>
 
@@ -11,12 +11,10 @@
 import themedP from './themed-components/themedP.vue';
 
 export default {
-  props: ['colorTheme', 'title'],
   components: { themedP },
-  methods: {
-    setColorTheme() {
-      this.$store.commit('SET_COLORPALETTE', this.colorTheme);
-    }
+  props: {
+    colorTheme: Object,
+    title: String
   },
   computed: {
     style() {
@@ -28,6 +26,11 @@ export default {
         '--color-3-inactive': this.colorTheme.color3Inactive,
         '--color-4': this.colorTheme.color4
       };
+    }
+  },
+  methods: {
+    setColorTheme() {
+      this.$store.commit('SET_COLORPALETTE', this.colorTheme);
     }
   }
 };

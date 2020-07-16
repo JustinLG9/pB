@@ -7,20 +7,20 @@
 
 <script>
 export default {
-  props: ['elemID'],
+  props: { elemID: String },
   data() {
     return {
       passwordVisible: false
-    }
+    };
   },
   methods: {
     togglePassword() {
-      const obj = document.getElementById(`${this.elemID}`)
-      obj.type === 'text' ? (obj.type = 'password') : (obj.type = 'type')
-      this.passwordVisible = !this.passwordVisible
+      const obj = document.getElementById(`${this.elemID}`);
+      obj.type === 'text' ? (obj.type = 'password') : (obj.type = 'type');
+      this.passwordVisible = !this.passwordVisible;
     }
   }
-}
+};
 </script>
 
 <style scoped>

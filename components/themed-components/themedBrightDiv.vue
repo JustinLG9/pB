@@ -1,7 +1,7 @@
 <template>
   <ThemedDiv
-    :backgroundColor="$store.getters['colorPalette'].color1Bright"
-    :borderColor="$store.getters['colorPalette'].color4"
+    :background-color="$store.getters['colorPalette'].color1Bright"
+    :border-color="$store.getters['colorPalette'].color4"
   >
     <slot></slot>
   </ThemedDiv>
@@ -15,5 +15,4 @@ export default {
 };
 </script>
 
-<style>
-</style>
+<style></style>

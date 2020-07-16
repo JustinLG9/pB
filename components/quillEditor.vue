@@ -6,7 +6,7 @@
 
 <script>
 export default {
-  props: ['previousContent'],
+  props: { previousContent: String },
   data() {
     return {
       content: this.previousContent || '',

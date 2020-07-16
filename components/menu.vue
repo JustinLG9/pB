@@ -7,32 +7,35 @@
           <colorpalette
             v-for="palette in colorPalettes"
             :key="palette.color1"
-            :colorTheme="palette"
+            :color-theme="palette"
             :title="palette.title"
             class="palette"
           />
         </div>
       </div>
       <themed-hr class="themed-hr" />
-      <themed-menu-button class="menuItem" @click.native="$store.commit('SET_EDITMODE')">
+      <themed-menu-button
+        class="menuItem"
+        @click.native="$store.commit('SET_EDITMODE')"
+      >
         <span class="iconHolder">
-          <i class="fas fa-pencil-alt" />
+          <i class="fas fa-pencil-alt buttonIcon" />
         </span>
-        <div>Edit</div>
+        <p class="buttonTitle">Edit</p>
       </themed-menu-button>
-      <themed-menu-button class="menuItem">
+      <themed-menu-button class="menuItem" @click.native="toggleSecurityPopUp">
         <span class="iconHolder">
-          <i class="fas fa-question" />
+          <i class="fas fa-shield-alt buttonIcon" />
         </span>
-        <div>How it works</div>
+        <p class="buttonTitle">Security</p>
       </themed-menu-button>
     </div>
     <themed-hr class="themed-hr" />
     <themed-menu-button class="menuItem logout" @click.native="logout">
       <span class="iconHolder">
-        <i class="fas fa-sign-out-alt" />
+        <i class="fas fa-sign-out-alt buttonIcon" />
       </span>
-      <div>Logout</div>
+      <p class="buttonTitle">Logout</p>
     </themed-menu-button>
   </themed-bright-div>
 </template>
@@ -47,6 +50,13 @@ import themedMenuButton from './themed-components/themedMenuButton.vue';
 import themedP from './themed-components/themedP.vue';
 
 export default {
+  components: {
+    colorpalette,
+    themedBrightDiv,
+    themedHr,
+    themedMenuButton,
+    themedP
+  },
   data() {
     return {
       colorPalettes: [
@@ -104,15 +114,9 @@ export default {
           color3Inactive: 'orange',
           color4: '#f2d492'
         }
-      ]
+      ],
+      showSecurityPopUp: false
     };
-  },
-  components: {
-    colorpalette,
-    themedBrightDiv,
-    themedHr,
-    themedMenuButton,
-    themedP
   },
   methods: {
     logout() {
@@ -122,6 +126,9 @@ export default {
         .then(() => {
           this.$router.push('login');
         });
+    },
+    toggleSecurityPopUp() {
+      this.showSecurityPopUp = !this.showSecurityPopUp;
     }
   }
 };
@@ -198,5 +205,10 @@ export default {
   margin-right: auto;
   border-width: 0;
   height: 2px;
+}
+
+.buttonIcon,
+.buttonTitle {
+  font-size: 17px;
 }
 </style>
