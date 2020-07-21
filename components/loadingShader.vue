@@ -1,15 +1,15 @@
 <template>
   <div class="shader">
-    <hollow-dots-spinner :animation-duration="1000" :dot-size="15" :dots-num="3" color="white" />
+    <hollow-dots-loader />
   </div>
 </template>
 
 <script>
-import { HollowDotsSpinner } from 'epic-spinners';
+import hollowDotsLoader from './hollow-dots-loader.vue';
 
 export default {
   components: {
-    HollowDotsSpinner
+    hollowDotsLoader
   }
 };
 </script>

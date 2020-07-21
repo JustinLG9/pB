@@ -1,20 +1,12 @@
 <template>
   <div class="lockBorder">
-    <span
-      class="lock"
-      :class="{ unlocked: unlocked }"
-      @click="unlocked = !unlocked"
-    ></span>
+    <span class="lock" :class="{ unlocked: signedIn }"></span>
   </div>
 </template>
 
 <script>
 export default {
-  data() {
-    return {
-      unlocked: false
-    };
-  }
+  props: { signedIn: Boolean }
 };
 </script>
 
@@ -44,9 +36,8 @@ export default {
   border-radius: 5px;
   position: relative;
   top: 5%;
-  cursor: pointer;
-  -webkit-transition: all 0.1s ease-in-out;
-  transition: all 0.1s ease-in-out;
+  -webkit-transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
 }
 .lock:after {
   content: '';
@@ -58,8 +49,8 @@ export default {
   top: calc(var(--lock-size) * 4 / 16);
   left: calc(var(--lock-size) * 5.5 / 16);
   margin: -3.5px 0 0 -2px;
-  -webkit-transition: all 0.1s ease-in-out;
-  transition: all 0.1s ease-in-out;
+  -webkit-transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
 }
 .lock:before {
   content: '';
@@ -74,12 +65,8 @@ export default {
   border-top-right-radius: 50%;
   border-top-left-radius: 50%;
   border-bottom: 0;
-  -webkit-transition: all 0.1s ease-in-out;
-  transition: all 0.1s ease-in-out;
-}
-/* Locked Hover */
-.lock:hover:before {
-  height: calc(var(--lock-size) * 5 / 8 + var(--lock-size) * 0.1);
+  -webkit-transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
 }
 /* Unlocked */
 .unlocked {
@@ -97,8 +84,5 @@ export default {
 }
 .unlocked:after {
   background: var(--unlocked-color);
-}
-.unlocked:hover:before {
-  height: calc(var(--lock-size) * 5 / 8);
 }
 </style>

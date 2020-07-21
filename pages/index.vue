@@ -33,24 +33,26 @@
       >Looks like you haven't posted yet. Give it a try above!</themed-p>
       <themed-p v-else-if="allDocumentsLoaded" class="footerMessage">That's all your posts!</themed-p>
       <div v-else class="footerMessage">
-        <hollow-dots-spinner :animation-duration="1000" :dot-size="15" :dots-num="3" color="white" />
+        <hollow-dots-loader />
       </div>
     </div>
 
-    <pop-up :showPopUp="showSecurityPopUp" @toggle-pop-up="togglePopUp">
+    <pop-up :show-pop-up="showSecurityPopUp" @toggle-pop-up="togglePopUp">
       <themed-h1 class="popUpTitle">Security</themed-h1>
 
       <themed-p class="popUpParagraph">
-        Looking for confidential journaling? You've come to the right place! All your entries are encrypted before they reach our database,
-        ensuring that you and only you have access to your information.
+        Looking for confidential journaling? You've come to the right place! All
+        your entries are encrypted before they reach our database, ensuring that
+        you and only you have access to your information.
       </themed-p>
       <themed-p class="popUpParagraph">
-        Not on a shared device? We generally don't keep you logged in to add an extra layer of protection but if this
-        isn't a shared computer feel free to check the box below!
+        Not on a shared device? We generally don't keep you logged in to add an
+        extra layer of protection but if this isn't a shared computer feel free
+        to check the box below!
       </themed-p>
       <div class="keepLoggedIn">
         <themed-p>Keep Me Logged In</themed-p>
-        <input type="checkbox" v-model="keepLoggedIn" class="checkbox" @change="toggleKeepLoggedIn" />
+        <input v-model="keepLoggedIn" type="checkbox" class="checkbox" @change="toggleKeepLoggedIn" />
       </div>
     </pop-up>
   </themed-container-div>
@@ -60,6 +62,7 @@
 import firebase from 'firebase/app';
 import Cookies from 'js-cookie';
 import CryptoJS from 'crypto-js';
+import hollowDotsLoader from '../components/hollow-dots-loader.vue';
 import newBlogPost from '../components/new-blog-post.vue';
 import blogPost from '../components/blog-post.vue';
 import menuScreen from '../components/menu.vue';
@@ -69,7 +72,6 @@ import themedP from '../components/themed-components/themedP.vue';
 import themedH1 from '../components/themed-components/themedH1.vue';
 import hamburgerButton from '../components/hamburger-button.vue';
 import popUp from '../components/popUp.vue';
-import { HollowDotsSpinner } from 'epic-spinners';
 
 const db = firebase.firestore();
 
@@ -84,7 +86,7 @@ export default {
     hamburgerButton,
     popUp,
     themedH1,
-    HollowDotsSpinner
+    hollowDotsLoader
   },
 
   asyncData({ req, redirect }) {
@@ -114,10 +116,11 @@ export default {
       lastDateCreated: 9999999999999,
       allDocumentsLoaded: false,
       showSecurityPopUp: false,
-      keepLoggedIn: true,
+      keepLoggedIn: Boolean(Cookies.get('access_token')),
       stateRehydrated: false
     };
   },
+
   computed: {
     disableInfiniteScroll() {
       if (this.stateRehydrated) {
@@ -127,13 +130,13 @@ export default {
       }
     },
     isStateRehydrated() {
-      return { uid: this.$store.state.UID, key: this.$store.state.key };
+      return Boolean(this.$store.state.UID) && Boolean(this.$store.state.key);
     }
   },
 
   watch: {
     isStateRehydrated(newData, oldData) {
-      if (newData.uid && newData.key) {
+      if (newData) {
         this.stateRehydrated = true;
       }
     }
@@ -145,6 +148,10 @@ export default {
     });
 
     this.setIsScrolled();
+
+    if (this.isStateRehydrated) {
+      this.stateRehydrated = true;
+    }
   },
 
   destroyed() {
@@ -196,7 +203,6 @@ export default {
           .startAfter(this.lastDateCreated)
           .get()
           .then((querySnapshot) => {
-            console.log(querySnapshot.docs.length, querySnapshot.empty);
             querySnapshot.forEach((doc) => {
               const decryptedData = doc.data();
               decryptedData.content = this.decryptString(
@@ -228,7 +234,6 @@ export default {
         .doc(post.uID)
         .delete()
         .then(() => {
-          console.log('Document successfully deleted!');
           const index = this.posts.findIndex(
             (localPost) => localPost.uID === post.uID
           );
@@ -259,7 +264,6 @@ export default {
           .doc(post.uID)
           .set(docData)
           .then(() => {
-            console.log('Document successfully updated!');
             const index = this.posts.findIndex(
               (localPost) => localPost.uID === post.uID
             );
@@ -298,7 +302,6 @@ export default {
           .doc(docData.uID)
           .set(docData)
           .then(() => {
-            console.log('Document successfully written!');
             // add new post to local posts data for rendering
             const decryptedData = docData;
             decryptedData.content = content;

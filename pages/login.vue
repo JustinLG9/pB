@@ -1,6 +1,6 @@
 <template>
   <div class="login">
-    <lockIcon v-if="!signingUp" />
+    <lockIcon v-if="!signingUp" :signed-in="signedIn" />
     <div v-else class="userBorder">
       <i class="fas fa-user-plus fa-5x userIcon"></i>
     </div>
@@ -35,9 +35,14 @@
       </div>
       <button v-if="!signingUp">Log In</button>
       <button v-else>Sign Up</button>
+      <div class="keepLoggedIn">
+        <p class="keepLoggedInMessage">Keep Me Logged In</p>
+        <input v-model="keepLoggedIn" type="checkbox" class="checkbox" />
+      </div>
     </form>
     <div v-if="error" class="error">{{ error.message }}</div>
     <div class="toggleLoginSignUp" @click="toggleLoginSignUp">{{ loginSignUpMessage }}</div>
+    <loading-shader v-if="signingIn" />
   </div>
 </template>
 
@@ -47,11 +52,13 @@ import Cookies from 'js-cookie';
 import CryptoJS from 'crypto-js';
 import lockIcon from '../components/lock-icon.vue';
 import showPassword from '../components/show-password.vue';
+import loadingShader from '../components/loadingShader.vue';
 
 export default {
   components: {
     lockIcon,
-    showPassword
+    showPassword,
+    loadingShader
   },
   data() {
     return {
@@ -60,31 +67,29 @@ export default {
       passwordConfirm: '',
       error: '',
       signingUp: false,
-      loginSignUpMessage: 'New user? Sign up'
+      loginSignUpMessage: 'New user? Sign up',
+      keepLoggedIn: false,
+      signedIn: false,
+      signingIn: false
     };
-  },
-  mounted() {
-    this.setupFirebase();
   },
   methods: {
     encryptString(str, key) {
       return CryptoJS.AES.encrypt(str, key).toString();
     },
-    setupFirebase() {
-      firebase.auth().onAuthStateChanged((user) => {
-        if (user) {
-          const uid = firebase.auth().currentUser.uid;
-          this.$store.commit('SET_UID', firebase.auth().currentUser.uid);
-          this.$store.commit('SET_KEY', this.password);
+    setupStoreAndCookies() {
+      const uid = firebase.auth().currentUser.uid;
+      if (uid) {
+        this.$store.commit('SET_UID', uid);
+        this.$store.commit('SET_KEY', this.password);
+
+        if (this.keepLoggedIn) {
           Cookies.set(
             'access_token',
             this.encryptString(uid, this.$store.state.key)
           );
-        } else {
-          Cookies.remove('access_token');
-          this.$store.commit('SET_UID', '');
         }
-      });
+      }
     },
     updateErrorMessage() {
       const message = this.error.message;
@@ -114,24 +119,42 @@ export default {
       } else if (this.signingUp && this.password !== this.passwordConfirm) {
         this.error = { message: 'Passwords do not match' };
       } else if (this.signingUp) {
+        this.signingIn = true;
         firebase
           .auth()
           .createUserWithEmailAndPassword(this.email, this.password)
           .then((data) => {
-            this.$router.push('/');
+            setTimeout(() => {
+              this.signingIn = false;
+              this.signedIn = true;
+              this.setupStoreAndCookies();
+              setTimeout(() => {
+                this.$router.push('/');
+              }, 1000);
+            }, 1000);
           })
           .catch((error) => {
+            this.signingIn = false;
             this.error = error;
             this.updateErrorMessage();
           });
       } else {
+        this.signingIn = true;
         firebase
           .auth()
           .signInWithEmailAndPassword(this.email, this.password)
           .then((data) => {
-            this.$router.push('/');
+            setTimeout(() => {
+              this.signingIn = false;
+              this.signedIn = true;
+              this.setupStoreAndCookies();
+              setTimeout(() => {
+                this.$router.push('/');
+              }, 1000);
+            }, 1000);
           })
           .catch((error) => {
+            this.signingIn = false;
             this.error = error;
             this.updateErrorMessage();
           });
@@ -217,6 +240,20 @@ button:hover {
 }
 .error {
   color: red;
+}
+.keepLoggedIn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+}
+.keepLoggedInMessage {
+  color: var(--color-2);
+}
+.checkbox {
+  margin-left: 30px;
+  height: 25px;
+  width: 25px;
 }
 
 ::-webkit-input-placeholder {

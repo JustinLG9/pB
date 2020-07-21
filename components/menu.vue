@@ -40,6 +40,7 @@
 <script>
 import firebase from 'firebase/app';
 import 'firebase/auth';
+import Cookies from 'js-cookie';
 import colorpalette from './color-palette.vue';
 import themedBrightDiv from './themed-components/themedBrightDiv.vue';
 import themedHr from './themed-components/themedHr.vue';
@@ -121,7 +122,11 @@ export default {
         .auth()
         .signOut()
         .then(() => {
+          Cookies.remove('access_token');
+          this.$store.commit('SET_UID', '');
+          this.$store.commit('SET_KEY', '');
           this.$router.push('login');
+          this.$router.push('/login');
         });
     },
     toggleSecurityPopUp() {
