@@ -220,7 +220,6 @@ export default {
             this.loadingDocs = false;
           })
           .catch((error) => {
-            console.error('Error getting documents: ', error);
             alert(
               'Error retrieving previous posts. Please check your internet connection and try again.'
             );
@@ -244,7 +243,6 @@ export default {
             'Error deleting post. Please check your internet connection and try again.'
           );
           this.$refs[post.uID][0].loading = false;
-          console.error('Error removing document: ', error);
         });
     },
     editPost(data) {
@@ -283,7 +281,6 @@ export default {
               'Error updating entry. Please check your internet connection and try again.'
             );
             this.$refs[post.uID][0].loading = false;
-            console.error('Error updating document: ', error);
           });
       }
     },
@@ -315,7 +312,6 @@ export default {
               'Error saving entry. Please check your internet connection and try again.'
             );
             this.$refs.newPost.submitting = false;
-            console.error('Error adding document: ', error);
           });
       }
     },
