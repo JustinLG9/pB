@@ -4,18 +4,31 @@
       class="blogPostDate title"
       @mouseenter.native="showTime = true"
       @mouseleave.native="showTime = false"
-    >{{ utcToDate(post.dateCreated) }}</themed-h1>
-    <themed-p v-if="showTime" class="blogPostTime">{{ utcToTime(post.dateCreated) }}</themed-p>
+      >{{ utcToDate(post.dateCreated) }}</themed-h1
+    >
+    <themed-p v-if="showTime" class="blogPostTime">{{
+      utcToTime(post.dateCreated)
+    }}</themed-p>
 
     <themed-p v-if="!editPost" class="blogPostContent" v-html="post.content" />
     <div v-else>
       <text-editor ref="textEditor" :previous-content="post.content" />
-      <themed-button class="submitEditedPost" @click.native="submitEditedPost">Submit</themed-button>
+      <themed-button class="submitEditedPost" @click.native="submitEditedPost"
+        >Submit</themed-button
+      >
     </div>
 
     <div class="editIcons">
-      <themed-i v-if="editMode" class="fas fa-pencil-alt editPost" @click.native="toggleEditPost" />
-      <themed-i v-if="editMode" class="fas fa-times fa-2x deletePost" @click.native="deletePost" />
+      <themed-i
+        v-if="editMode"
+        class="fas fa-pencil-alt editPost"
+        @click.native="toggleEditPost"
+      />
+      <themed-i
+        v-if="editMode"
+        class="fas fa-times fa-2x deletePost"
+        @click.native="deletePost"
+      />
     </div>
 
     <loading-shader v-if="loading" />

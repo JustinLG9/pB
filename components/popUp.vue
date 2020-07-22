@@ -1,7 +1,14 @@
 <template>
-  <div v-if="showPopUp" class="popUpShader" @click.native="$emit('toggle-pop-up')">
+  <div
+    v-if="showPopUp"
+    class="popUpShader"
+    @click.native="$emit('toggle-pop-up')"
+  >
     <themed-bright-div class="popUpWindow">
-      <themed-i class="fas fa-times fa-2x closePopUp" @click.native="$emit('toggle-pop-up')" />
+      <themed-i
+        class="fas fa-times fa-2x closePopUp"
+        @click.native="$emit('toggle-pop-up')"
+      />
       <slot></slot>
     </themed-bright-div>
   </div>
@@ -12,8 +19,8 @@ import themedBrightDiv from './themed-components/themedBrightDiv.vue';
 import themedI from './themed-components/themedI.vue';
 
 export default {
-  props: { showPopUp: Boolean },
-  components: { themedBrightDiv, themedI }
+  components: { themedBrightDiv, themedI },
+  props: { showPopUp: Boolean }
 };
 </script>
 

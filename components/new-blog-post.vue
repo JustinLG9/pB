@@ -3,7 +3,9 @@
     <themed-h1 class="title">New Post</themed-h1>
 
     <text-editor ref="textEditor" />
-    <themed-button class="submitNewPost" @click.native="submitPost">Submit</themed-button>
+    <themed-button class="submitNewPost" @click.native="submitPost"
+      >Submit</themed-button
+    >
 
     <loading-shader v-if="submitting" />
   </themed-div>

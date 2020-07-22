@@ -14,13 +14,19 @@
         </div>
       </div>
       <themed-hr class="themed-hr" />
-      <themed-menu-button class="menuItem" @click.native="$store.commit('SET_EDITMODE')">
+      <themed-menu-button
+        class="menuItem"
+        @click.native="$store.commit('SET_EDITMODE')"
+      >
         <span class="iconHolder">
           <i class="fas fa-pencil-alt buttonIcon" />
         </span>
         <p class="buttonTitle">Edit</p>
       </themed-menu-button>
-      <themed-menu-button class="menuItem" @click.native="$emit('toggle-pop-up')">
+      <themed-menu-button
+        class="menuItem"
+        @click.native="$emit('toggle-pop-up')"
+      >
         <span class="iconHolder">
           <i class="fas fa-shield-alt buttonIcon" />
         </span>

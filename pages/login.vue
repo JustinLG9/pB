@@ -41,7 +41,9 @@
       </div>
     </form>
     <div v-if="error" class="error">{{ error.message }}</div>
-    <div class="toggleLoginSignUp" @click="toggleLoginSignUp">{{ loginSignUpMessage }}</div>
+    <div class="toggleLoginSignUp" @click="toggleLoginSignUp">
+      {{ loginSignUpMessage }}
+    </div>
     <loading-shader v-if="signingIn" />
   </div>
 </template>

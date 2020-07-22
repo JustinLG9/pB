@@ -1,6 +1,10 @@
 <template>
   <themed-container-div class="container">
-    <hamburger-button :active="showMenu" class="menuIcon" @click.native="toggleMenu()" />
+    <hamburger-button
+      :active="showMenu"
+      class="menuIcon"
+      @click.native="toggleMenu()"
+    />
     <transition name="slide-fade">
       <menuScreen v-if="showMenu" @toggle-pop-up="togglePopUp" />
     </transition>
@@ -27,11 +31,12 @@
         @edit-post="editPost($event)"
         @delete-post="deletePost($event)"
       />
-      <themed-p
-        v-if="posts.length === 0"
-        class="footerMessage"
-      >Looks like you haven't posted yet. Give it a try above!</themed-p>
-      <themed-p v-else-if="allDocumentsLoaded" class="footerMessage">That's all your posts!</themed-p>
+      <themed-p v-if="posts.length === 0" class="footerMessage"
+        >Looks like you haven't posted yet. Give it a try above!</themed-p
+      >
+      <themed-p v-else-if="allDocumentsLoaded" class="footerMessage"
+        >That's all your posts!</themed-p
+      >
       <div v-else class="footerMessage">
         <hollow-dots-loader />
       </div>
@@ -52,7 +57,12 @@
       </themed-p>
       <div class="keepLoggedIn">
         <themed-p>Keep Me Logged In</themed-p>
-        <input v-model="keepLoggedIn" type="checkbox" class="checkbox" @change="toggleKeepLoggedIn" />
+        <input
+          v-model="keepLoggedIn"
+          type="checkbox"
+          class="checkbox"
+          @change="toggleKeepLoggedIn"
+        />
       </div>
     </pop-up>
   </themed-container-div>
@@ -220,6 +230,7 @@ export default {
             this.loadingDocs = false;
           })
           .catch((error) => {
+            console.error('Error getting documents: ', error);
             alert(
               'Error retrieving previous posts. Please check your internet connection and try again.'
             );
@@ -233,6 +244,7 @@ export default {
         .doc(post.uID)
         .delete()
         .then(() => {
+          console.log('Document successfully deleted!');
           const index = this.posts.findIndex(
             (localPost) => localPost.uID === post.uID
           );
@@ -243,6 +255,7 @@ export default {
             'Error deleting post. Please check your internet connection and try again.'
           );
           this.$refs[post.uID][0].loading = false;
+          console.error('Error removing document: ', error);
         });
     },
     editPost(data) {
@@ -262,6 +275,7 @@ export default {
           .doc(post.uID)
           .set(docData)
           .then(() => {
+            console.log('Document successfully updated!');
             const index = this.posts.findIndex(
               (localPost) => localPost.uID === post.uID
             );
@@ -281,6 +295,7 @@ export default {
               'Error updating entry. Please check your internet connection and try again.'
             );
             this.$refs[post.uID][0].loading = false;
+            console.error('Error updating document: ', error);
           });
       }
     },
@@ -299,6 +314,7 @@ export default {
           .doc(docData.uID)
           .set(docData)
           .then(() => {
+            console.log('Document successfully written!');
             // add new post to local posts data for rendering
             const decryptedData = docData;
             decryptedData.content = content;
@@ -312,6 +328,7 @@ export default {
               'Error saving entry. Please check your internet connection and try again.'
             );
             this.$refs.newPost.submitting = false;
+            console.error('Error adding document: ', error);
           });
       }
     },
