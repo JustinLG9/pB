@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "npm run lint -- --fix && nuxt",
     "build": "nuxt build",
-    "start": "npm run lint -- --fix && nuxt start",
+    "start": "nuxt start",
     "generate": "nuxt generate",
     "lint": "eslint --ext .js,.vue --ignore-path .eslintignore"
   },
