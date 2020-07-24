@@ -62,6 +62,11 @@ export default {
     showPassword,
     loadingShader
   },
+  head() {
+    return {
+      title: 'Login'
+    };
+  },
   data() {
     return {
       email: '',

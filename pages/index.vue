@@ -112,6 +112,12 @@ export default {
     }
   },
 
+  head() {
+    return {
+      title: 'Private Journal'
+    }
+  },
+
   data() {
     return {
       posts: [],
