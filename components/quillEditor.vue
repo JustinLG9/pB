@@ -12,7 +12,7 @@ export default {
       content: this.previousContent || '',
       editorOption: {
         theme: 'snow',
-        placeholder: 'Spill that shit...',
+        placeholder: 'Whats on your mind...',
         modules: {
           toolbar: [
             ['bold', 'italic', 'underline', 'strike'],
